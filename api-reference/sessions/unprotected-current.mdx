@@ -1,0 +1,174 @@
+---
+title: Get unprotected current user
+description: Retrieve current user information from unprotected cookie (for testing/development)
+api: GET /api/sessions/unprotectedCurrent
+---
+
+Retrieve the current authenticated user's information from the unprotected JWT cookie. This endpoint verifies the `unprotectedCookie` and returns the full user object stored in the token.
+
+<Warning>
+  This endpoint is intended for testing and development purposes only. It returns the full user object including the hashed password. Use the standard `/api/sessions/current` endpoint in production.
+</Warning>
+
+## Authentication
+
+Requires a valid `unprotectedCookie` set by the `/api/sessions/unprotectedLogin` endpoint.
+
+## Response
+
+<ResponseField name="status" type="string">
+  Response status - "success" or "error"
+</ResponseField>
+
+<ResponseField name="payload" type="object">
+  The full user object from the JWT token
+  
+  <Expandable title="properties">
+    <ResponseField name="_id" type="ObjectId">
+      User's unique identifier
+    </ResponseField>
+    
+    <ResponseField name="first_name" type="string">
+      User's first name
+    </ResponseField>
+    
+    <ResponseField name="last_name" type="string">
+      User's last name
+    </ResponseField>
+    
+    <ResponseField name="email" type="string">
+      User's email address
+    </ResponseField>
+    
+    <ResponseField name="password" type="string">
+      Bcrypt hashed password (should not be exposed)
+    </ResponseField>
+    
+    <ResponseField name="role" type="string">
+      User's role (default: "user")
+    </ResponseField>
+    
+    <ResponseField name="pets" type="array">
+      Array of adopted pet references
+    </ResponseField>
+    
+    <ResponseField name="iat" type="number">
+      Token issued at timestamp (Unix time)
+    </ResponseField>
+    
+    <ResponseField name="exp" type="number">
+      Token expiration timestamp (Unix time)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Success Response (200 OK)
+
+```json
+{
+  "status": "success",
+  "payload": {
+    "_id": "507f1f77bcf86cd799439011",
+    "first_name": "John",
+    "last_name": "Smith",
+    "email": "john@example.com",
+    "password": "$2b$10$abcdefghijklmnopqrstuvwxyz1234567890",
+    "role": "user",
+    "pets": [],
+    "iat": 1234567890,
+    "exp": 1234571490
+  }
+}
+```
+
+### Error Response
+
+**500 Internal Server Error** - Invalid or expired token
+```
+Ha ocurrido un error en la petición, por favor ver detalle: [error details]
+```
+
+Common causes:
+- No `unprotectedCookie` present in request
+- Token has expired (> 1 hour old)
+- Token signature is invalid
+- Token was signed with different secret
+
+## Example Request
+
+<CodeGroup>
+```bash cURL
+curl -X GET http://localhost:8080/api/sessions/unprotectedCurrent \
+  -H "Cookie: unprotectedCookie=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:8080/api/sessions/unprotectedCurrent', {
+  method: 'GET',
+  credentials: 'include', // Important: include cookies
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+```python Python
+import requests
+
+# Assumes you have a session with the cookie set
+session = requests.Session()
+
+response = session.get('http://localhost:8080/api/sessions/unprotectedCurrent')
+
+print(response.json())
+```
+</CodeGroup>
+
+## Token Verification
+
+The endpoint verifies the JWT token using:
+- **Secret**: 'tokenSecretJWT'
+- **Algorithm**: HS256 (default)
+
+The token must be valid and not expired (tokens expire 1 hour after issuance).
+
+## Security Considerations
+
+<Warning>
+  **Never use this endpoint in production!**
+  
+  Security issues:
+  - Exposes hashed password in response
+  - Full user object in JWT increases token size
+  - No data minimization (violates principle of least privilege)
+  - Potential information disclosure vulnerability
+</Warning>
+
+For production use, always use the standard `/api/sessions/current` endpoint which returns only a UserDTO with minimal necessary information (name, role, email).
+
+## Key Differences from Standard Current
+
+| Feature | Standard Current | Unprotected Current |
+|---------|-----------------|---------------------|
+| Cookie Name | `coderCookie` | `unprotectedCookie` |
+| Response Data | UserDTO only | Full user object |
+| Password in Response | No | Yes (hashed) |
+| Token Size | Small | Large |
+| Production Use | ✅ Yes | ❌ No - Testing only |
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card title="Standard Current" icon="id-badge" href="/api-reference/sessions/current">
+    Production-ready current user endpoint
+  </Card>
+  <Card title="Unprotected Login" icon="lock-open" href="/api-reference/sessions/unprotected-login">
+    Login with unprotected cookie
+  </Card>
+  <Card title="Login" icon="lock" href="/api-reference/sessions/login">
+    Standard login endpoint
+  </Card>
+  <Card title="Register" icon="user-plus" href="/api-reference/sessions/register">
+    Create a new user account
+  </Card>
+</CardGroup>

@@ -8,10 +8,6 @@
     "dark": "#244455"
   },
   "favicon": "https://media.brand.dev/5f89fdd0-2051-4636-9ddc-ad62ee78d900.png",
-  "logo": {
-    "light": "/logo.png",
-    "dark": "/logo.png"
-  },
   "navbar": {
     "primary": {
       "type": "github",
@@ -69,7 +65,9 @@
             "pages": [
               "api-reference/sessions/register",
               "api-reference/sessions/login",
-              "api-reference/sessions/current"
+              "api-reference/sessions/current",
+              "api-reference/sessions/unprotected-login",
+              "api-reference/sessions/unprotected-current"
             ]
           },
           {

@@ -107,6 +107,8 @@
     "POST /api/sessions/register",
     "POST /api/sessions/login",
     "GET /api/sessions/current",
+    "GET /api/sessions/unprotectedLogin",
+    "GET /api/sessions/unprotectedCurrent",
     "GET /api/users",
     "GET /api/users/:uid",
     "PUT /api/users/:uid",
