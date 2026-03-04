@@ -1,0 +1,77 @@
+---
+title: "Get Adoption by ID"
+api: "GET /api/adoptions/:aid"
+description: "Retrieve a specific adoption record by its ID"
+---
+
+This endpoint returns detailed information about a single adoption record, including the relationship between the user and the adopted pet.
+
+## Path Parameters
+
+<ParamField path="aid" type="string" required>
+  The unique identifier (ObjectId) of the adoption record to retrieve.
+</ParamField>
+
+## Response
+
+<ResponseField name="status" type="string" required>
+  The status of the response. Returns "success" on successful retrieval.
+</ResponseField>
+
+<ResponseField name="payload" type="object" required>
+  The adoption object containing the relationship data.
+  
+  <ResponseField name="_id" type="string" required>
+    The unique identifier for the adoption record.
+  </ResponseField>
+  
+  <ResponseField name="owner" type="string" required>
+    The ObjectId reference to the User who adopted the pet. This corresponds to a user's `_id` in the Users collection.
+  </ResponseField>
+  
+  <ResponseField name="pet" type="string" required>
+    The ObjectId reference to the Pet that was adopted. This corresponds to a pet's `_id` in the Pets collection.
+  </ResponseField>
+</ResponseField>
+
+## Response Example
+
+```json
+{
+  "status": "success",
+  "payload": {
+    "_id": "65a1b2c3d4e5f6789abcdef0",
+    "owner": "65a1b2c3d4e5f6789abcdef1",
+    "pet": "65a1b2c3d4e5f6789abcdef2"
+  }
+}
+```
+
+## Understanding the Adoption Record
+
+The adoption record serves as a junction between users and pets:
+- The `owner` field links to the user who completed the adoption
+- The `pet` field links to the specific pet that was adopted
+- This record is created when a user successfully adopts a pet via the POST endpoint
+- The adoption permanently associates the pet with the user in the system
+
+## Error Responses
+
+### 404 Not Found
+
+Returned when the adoption ID does not exist in the database.
+
+```json
+{
+  "status": "error",
+  "error": "Adoption not found"
+}
+```
+
+### 500 Internal Server Error
+
+Returned when a server error occurs during the request.
+
+```json
+"Ha ocurrido un error en la petición, por favor ver detalle: [error details]"
+```

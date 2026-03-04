@@ -1,0 +1,139 @@
+---
+title: "Update Pet"
+api: "PUT /api/pets/:pid"
+description: "Update an existing pet's information"
+---
+
+This endpoint updates the information of an existing pet in the adoption system.
+
+### Path Parameters
+
+<ParamField path="pid" type="string" required>
+  The unique identifier of the pet to update.
+</ParamField>
+
+### Body
+
+All fields are optional. Only include the fields you want to update.
+
+<ParamField body="name" type="string" optional>
+  The updated name of the pet.
+</ParamField>
+
+<ParamField body="specie" type="string" optional>
+  The updated species of the pet.
+</ParamField>
+
+<ParamField body="birthDate" type="string" optional>
+  The updated birth date of the pet.
+</ParamField>
+
+<ParamField body="adopted" type="boolean" optional>
+  Whether the pet has been adopted.
+</ParamField>
+
+<ParamField body="owner" type="string" optional>
+  The ID of the user who adopted the pet. Typically set when `adopted` is `true`.
+</ParamField>
+
+<ParamField body="image" type="string" optional>
+  The file path to the pet's image.
+</ParamField>
+
+### Response
+
+<ResponseField name="status" type="string">
+  The status of the response. Returns `"success"` on successful update.
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  A confirmation message. Returns `"pet updated"` on success.
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl --request PUT \
+  --url https://api.adoptme.com/api/pets/507f1f77bcf86cd799439011 \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "adopted": true,
+    "owner": "507f1f77bcf86cd799439020"
+  }'
+```
+
+```javascript JavaScript
+const petId = '507f1f77bcf86cd799439011';
+
+const response = await fetch(`https://api.adoptme.com/api/pets/${petId}`, {
+  method: 'PUT',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    adopted: true,
+    owner: '507f1f77bcf86cd799439020'
+  })
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+pet_id = '507f1f77bcf86cd799439011'
+
+response = requests.put(
+  f'https://api.adoptme.com/api/pets/{pet_id}',
+  json={
+    'adopted': True,
+    'owner': '507f1f77bcf86cd799439020'
+  }
+)
+
+data = response.json()
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 Success
+{
+  "status": "success",
+  "message": "pet updated"
+}
+```
+
+```json 500 Error
+{
+  "error": "Ha ocurrido un error en la petición, por favor ver detalle: ..."
+}
+```
+</ResponseExample>
+
+## Common Use Cases
+
+### Mark a Pet as Adopted
+
+```json
+{
+  "adopted": true,
+  "owner": "507f1f77bcf86cd799439020"
+}
+```
+
+### Update Pet Information
+
+```json
+{
+  "name": "Max Jr.",
+  "birthDate": "2020-06-15"
+}
+```
+
+### Add or Update Pet Image
+
+```json
+{
+  "image": "/public/img/1678901234567-new-photo.jpg"
+}
+```

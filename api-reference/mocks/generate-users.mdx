@@ -1,0 +1,102 @@
+---
+title: 'Generate Mock Users'
+api: 'GET /api/mocks/mockingusers'
+---
+
+Generates mock user data using @faker-js for testing purposes. Returns an array of users with realistic Spanish (Mexico) locale data including names, emails, and encrypted passwords.
+
+## Query Parameters
+
+<ParamField query="cantidad" type="integer" default="1">
+  Number of mock users to generate. Must be a positive integer. If not provided, defaults to 1.
+</ParamField>
+
+## Response
+
+<ResponseField name="usuarios" type="array">
+  Array of generated user objects
+  
+  <ResponseField name="first_name" type="string">
+    User's first name generated using faker
+  </ResponseField>
+  
+  <ResponseField name="last_name" type="string">
+    User's last name generated using faker
+  </ResponseField>
+  
+  <ResponseField name="email" type="string">
+    Email address generated from first and last name with @gmail.com domain
+  </ResponseField>
+  
+  <ResponseField name="password" type="string">
+    Hashed password (default: 'coder123' encrypted)
+  </ResponseField>
+  
+  <ResponseField name="role" type="string">
+    User role, randomly assigned as either 'user' or 'admin'
+  </ResponseField>
+  
+  <ResponseField name="pets" type="array">
+    Empty array of pets (can be populated later)
+  </ResponseField>
+</ResponseField>
+
+<ResponseField name="error" type="string">
+  Error message when validation fails (400 status)
+</ResponseField>
+
+## Faker-js Integration
+
+This endpoint uses [@faker-js/faker](https://fakerjs.dev/) with Spanish (Mexico) locale to generate realistic test data:
+
+- **Names**: `fa.person.firstName()` and `fa.person.lastName()`
+- **Emails**: `fa.internet.email()` based on generated names
+- **Roles**: `fa.helpers.arrayElement(['user', 'admin'])`
+- **Password**: Hashed using bcrypt with default value 'coder123'
+
+## Validation
+
+- The `cantidad` parameter must be a positive number
+- Negative values return a 400 error with message "Cantidad enviada debe de ser positiva"
+- Missing parameter defaults to generating 1 user
+
+<RequestExample>
+```bash Generate 50 users
+curl -X GET "http://localhost:8080/api/mocks/mockingusers?cantidad=50"
+```
+
+```bash Generate single user (default)
+curl -X GET "http://localhost:8080/api/mocks/mockingusers"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response (200)
+{
+  "usuarios": [
+    {
+      "first_name": "Jerónimo",
+      "last_name": "Arroyo",
+      "email": "Jeronimo_Arroyo63@gmail.com",
+      "password": "$2b$10$8kJZ9K4z...",
+      "role": "user",
+      "pets": []
+    },
+    {
+      "first_name": "María",
+      "last_name": "González",
+      "email": "Maria_Gonzalez@gmail.com",
+      "password": "$2b$10$8kJZ9K4z...",
+      "role": "admin",
+      "pets": []
+    }
+  ]
+}
+```
+
+```json Error Response (400)
+{
+  "error": "Cantidad enviada debe de ser positiva"
+}
+```
+</ResponseExample>

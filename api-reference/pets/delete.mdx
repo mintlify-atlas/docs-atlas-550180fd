@@ -1,0 +1,77 @@
+---
+title: "Delete Pet"
+api: "DELETE /api/pets/:pid"
+description: "Delete a pet from the system"
+---
+
+This endpoint removes a pet from the adoption system.
+
+### Path Parameters
+
+<ParamField path="pid" type="string" required>
+  The unique identifier of the pet to delete.
+</ParamField>
+
+### Response
+
+<ResponseField name="status" type="string">
+  The status of the response. Returns `"success"` on successful deletion.
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  A confirmation message. Returns `"pet deleted"` on success.
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl --request DELETE \
+  --url https://api.adoptme.com/api/pets/507f1f77bcf86cd799439011
+```
+
+```javascript JavaScript
+const petId = '507f1f77bcf86cd799439011';
+
+const response = await fetch(`https://api.adoptme.com/api/pets/${petId}`, {
+  method: 'DELETE'
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+pet_id = '507f1f77bcf86cd799439011'
+
+response = requests.delete(
+  f'https://api.adoptme.com/api/pets/{pet_id}'
+)
+
+data = response.json()
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 Success
+{
+  "status": "success",
+  "message": "pet deleted"
+}
+```
+
+```json 500 Error
+{
+  "error": "Ha ocurrido un error en la petición, por favor ver detalle: ..."
+}
+```
+</ResponseExample>
+
+<Warning>
+  This operation is permanent and cannot be undone. Make sure you have the correct pet ID before deleting.
+</Warning>
+
+## Notes
+
+- Deleting a pet does not automatically remove associated image files from the server
+- If the pet is currently adopted (has an owner), consider updating the adoption status instead of deleting
+- Ensure proper authorization checks are implemented before allowing pet deletion in production environments

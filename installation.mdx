@@ -1,0 +1,591 @@
+---
+title: Installation
+description: Complete installation guide for Adoptme API with detailed configuration options and deployment instructions
+---
+
+# Installation Guide
+
+This comprehensive guide covers everything you need to install, configure, and deploy the Adoptme API.
+
+## System Requirements
+
+### Required Software
+
+Before installing Adoptme API, ensure your system meets these requirements:
+
+<CardGroup cols={2}>
+  <Card title="Node.js" icon="node-js">
+    **Version 22 or higher**
+    
+    Adoptme uses ES modules and modern JavaScript features that require Node.js 22+
+  </Card>
+  <Card title="MongoDB" icon="database">
+    **Version 4.4 or higher**
+    
+    Local installation or MongoDB Atlas cloud database
+  </Card>
+  <Card title="npm" icon="npm">
+    **Version 8 or higher**
+    
+    Comes with Node.js installation
+  </Card>
+  <Card title="Git" icon="git">
+    **Latest version**
+    
+    For cloning the repository
+  </Card>
+</CardGroup>
+
+### Verify Your Installation
+
+Check that you have the required versions installed:
+
+```bash
+node --version   # Should output v22.x.x or higher
+npm --version    # Should output 8.x.x or higher
+mongod --version # Should output 4.4.x or higher
+```
+
+<Warning>
+**Important**: Adoptme will not run correctly on Node.js versions below 22. The project uses ES modules (`type: "module"` in package.json) and modern JavaScript features.
+</Warning>
+
+## Installation Methods
+
+### Method 1: Standard Installation (Recommended)
+
+<Steps>
+  <Step title="Clone the Repository">
+    Download the Adoptme API source code:
+
+    ```bash
+    git clone https://github.com/GitRepoFabi/coderhouse-backendIII.git
+    cd coderhouse-backendIII
+    ```
+
+    Or clone to a specific directory:
+
+    ```bash
+    git clone https://github.com/GitRepoFabi/coderhouse-backendIII.git adoptme-api
+    cd adoptme-api
+    ```
+  </Step>
+
+  <Step title="Install Dependencies">
+    Install all required npm packages:
+
+    ```bash
+    npm install
+    ```
+
+    This will install:
+
+    **Core Dependencies:**
+    - `express` (4.18.2) - Web framework
+    - `mongoose` (6.7.5) - MongoDB ODM
+    - `dotenv` (17.2.2) - Environment variable management
+
+    **Authentication:**
+    - `bcrypt` (5.1.0) - Password hashing
+    - `jsonwebtoken` (8.5.1) - JWT token generation
+    - `cookie-parser` (1.4.6) - Cookie parsing middleware
+
+    **Documentation:**
+    - `swagger-jsdoc` (6.2.8) - Swagger documentation generator
+    - `swagger-ui-express` (5.0.1) - Swagger UI interface
+
+    **Testing & Mocking:**
+    - `@faker-js/faker` (9.9.0) - Mock data generation
+    - `supertest` (6.3.3) - HTTP testing
+    - `mocha` (10.1.0) - Test framework
+    - `chai` (4.3.7) - Assertion library
+
+    **File Uploads:**
+    - `multer` (1.4.5-lts.1) - File upload handling
+  </Step>
+
+  <Step title="Configure Environment Variables">
+    Create a `.env` file in the project root directory:
+
+    ```bash
+    touch .env
+    ```
+
+    Add your configuration:
+
+    ```bash
+    PORT=8080
+    MONGO_URL=mongodb://127.0.0.1:27017
+    DB_NAME=adoptme
+    ```
+
+    <Accordion title="Environment Variable Reference">
+      | Variable | Description | Default | Required |
+      |----------|-------------|---------|----------|
+      | `PORT` | Server port number | 8080 | No |
+      | `MONGO_URL` | MongoDB connection string | mongodb://127.0.0.1:27017 | Yes |
+      | `DB_NAME` | Database name | adoptme | Yes |
+
+      <Note>
+      The application will use default values for `PORT` and `MONGO_URL` if not specified, but it's recommended to set them explicitly. See `src/config/config.js:5-8` for default values.
+      </Note>
+    </Accordion>
+  </Step>
+
+  <Step title="Start the Server">
+    Launch the API server:
+
+    ```bash
+    npm start
+    ```
+
+    Expected output:
+    ```
+    Connection successful MongoDB
+    Listening on 8080
+    ```
+
+    <Note>
+    The server connects to MongoDB before starting. If the connection fails, the process will exit with code 1. See `src/app.js:17-22` for connection handling.
+    </Note>
+  </Step>
+</Steps>
+
+### Method 2: Docker Installation
+
+Run Adoptme API in a Docker container for isolated, reproducible deployments.
+
+<Steps>
+  <Step title="Build the Docker Image">
+    Create a Docker image from the project directory:
+
+    ```bash
+    docker build -t adoptme-api:1.0.0 .
+    ```
+
+    Or with your Docker Hub username:
+
+    ```bash
+    docker build -t yourusername/adoptme-api:1.0.0 .
+    ```
+
+    <Note>
+    The build process may take a few minutes as it installs all dependencies inside the container.
+    </Note>
+  </Step>
+
+  <Step title="Run the Container">
+    Start a container from your image:
+
+    ```bash
+    docker run -d \
+      --name adoptme-api \
+      -p 8080:8080 \
+      -e PORT=8080 \
+      -e MONGO_URL=mongodb://host.docker.internal:27017 \
+      -e DB_NAME=adoptme \
+      adoptme-api:1.0.0
+    ```
+
+    <Accordion title="Docker Run Options Explained">
+      - `-d`: Run container in detached mode (background)
+      - `--name adoptme-api`: Name the container
+      - `-p 8080:8080`: Map port 8080 from container to host
+      - `-e PORT=8080`: Set environment variable for application port
+      - `-e MONGO_URL=...`: MongoDB connection string
+      - `-e DB_NAME=adoptme`: Database name
+
+      <Warning>
+      **MongoDB Connection from Docker**:
+      - Use `host.docker.internal` to connect to MongoDB on your host machine
+      - Use `mongodb://mongo:27017` if running MongoDB in another Docker container
+      - Use your Atlas connection string for MongoDB Atlas
+      </Warning>
+    </Accordion>
+  </Step>
+
+  <Step title="Verify Container is Running">
+    Check container status:
+
+    ```bash
+    docker ps
+    ```
+
+    View container logs:
+
+    ```bash
+    docker logs adoptme-api
+    ```
+
+    You should see:
+    ```
+    Connection successful MongoDB
+    Listening on 8080
+    ```
+  </Step>
+</Steps>
+
+### Method 3: Pull from Docker Hub
+
+Use the pre-built Docker image:
+
+```bash
+# Pull the image
+docker pull fabil2025/serverentregafinal:1.0.0
+
+# Run the container
+docker run -d \
+  --name adoptme-api \
+  -p 8080:8080 \
+  -e PORT=8080 \
+  -e MONGO_URL=your_mongodb_connection_string \
+  -e DB_NAME=adoptme \
+  fabil2025/serverentregafinal:1.0.0
+```
+
+<Note>
+This is the fastest way to get started with Docker. The image is pre-built and ready to run.
+</Note>
+
+## MongoDB Setup
+
+### Option 1: Local MongoDB
+
+Install MongoDB locally:
+
+<CodeGroup>
+```bash Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install -y mongodb
+sudo systemctl start mongodb
+sudo systemctl enable mongodb
+```
+
+```bash macOS (Homebrew)
+brew tap mongodb/brew
+brew install mongodb-community
+brew services start mongodb-community
+```
+
+```bash Windows
+# Download MongoDB Community Server from:
+# https://www.mongodb.com/try/download/community
+
+# Start MongoDB:
+net start MongoDB
+```
+</CodeGroup>
+
+Verify MongoDB is running:
+
+```bash
+mongosh --eval "db.version()"
+```
+
+### Option 2: MongoDB Atlas (Cloud)
+
+<Steps>
+  <Step title="Create an Atlas Account">
+    Sign up at [mongodb.com/cloud/atlas](https://www.mongodb.com/cloud/atlas)
+  </Step>
+
+  <Step title="Create a Cluster">
+    Create a free M0 cluster in your preferred region
+  </Step>
+
+  <Step title="Configure Network Access">
+    Add your IP address to the IP Access List, or use `0.0.0.0/0` for development (not recommended for production)
+  </Step>
+
+  <Step title="Create Database User">
+    Create a database user with read/write permissions
+  </Step>
+
+  <Step title="Get Connection String">
+    Copy your connection string and update your `.env` file:
+
+    ```bash
+    MONGO_URL=mongodb+srv://username:password@cluster.mongodb.net/
+    DB_NAME=adoptme
+    ```
+  </Step>
+</Steps>
+
+## Configuration Details
+
+### Application Configuration
+
+The configuration is managed in `src/config/config.js:5-9`:
+
+```javascript
+export default  {
+    PORT: process.env.PORT || 8080,
+    MONGO_URL: process.env.MONGO_URL || 'mongodb://127.0.0.1:27017',
+    DB_NAME: process.env.DB_NAME || 'adoptme'
+}
+```
+
+### MongoDB Connection
+
+The application connects to MongoDB on startup (`src/app.js:17-22`):
+
+```javascript
+const connection = mongoose.connect(config.MONGO_URL, {dbName: config.DB_NAME})
+    .then(() => console.log("Connection successful MongoDB"))
+    .catch((err) => {
+        console.error({ error: err })
+        process.exit(1)
+    })
+```
+
+<Warning>
+**Critical**: If MongoDB connection fails, the application will exit immediately. Ensure MongoDB is running and the connection string is correct before starting the server.
+</Warning>
+
+### API Routes Configuration
+
+API routes are configured in `src/app.js:41-46`:
+
+```javascript
+app.use('/api/users', usersRouter);
+app.use('/api/pets', petsRouter);
+app.use('/api/adoptions', adoptionsRouter);
+app.use('/api/sessions', sessionsRouter);
+app.use('/api/mocks', mockRouter);
+app.use("/docs", swaggerUI.serve, swaggerUI.setup(spec))
+```
+
+## Development Setup
+
+### Running in Development Mode
+
+Use nodemon for automatic server restarts during development:
+
+```bash
+npm run dev
+```
+
+This runs `nodemon src/app.js` as defined in `package.json:9`.
+
+### Running Tests
+
+Execute the test suite:
+
+```bash
+npm test
+```
+
+This runs Mocha tests from `test/supertest.test.js` as defined in `package.json:10`.
+
+<Note>
+Tests use Supertest for HTTP assertions and Chai for expectations. Make sure MongoDB is running before executing tests.
+</Note>
+
+## Project Structure
+
+Understanding the project structure:
+
+```
+adoptme-api/
+├── src/
+│   ├── app.js                    # Application entry point
+│   ├── config/
+│   │   └── config.js            # Environment configuration
+│   ├── controllers/             # Request handlers
+│   │   ├── adoptions.controller.js
+│   │   ├── pets.controller.js
+│   │   ├── sessions.controller.js
+│   │   └── users.controller.js
+│   ├── dao/                     # Data Access Objects
+│   │   ├── Adoption.js
+│   │   ├── Pets.dao.js
+│   │   ├── Users.dao.js
+│   │   └── models/             # Mongoose schemas
+│   │       ├── Adoption.js
+│   │       ├── Pet.js
+│   │       └── User.js
+│   ├── dto/                    # Data Transfer Objects
+│   │   ├── Pet.dto.js
+│   │   └── User.dto.js
+│   ├── mocks/                  # Mock data generators
+│   │   └── mocks.js
+│   ├── repository/             # Repository pattern
+│   │   ├── AdoptionRepository.js
+│   │   ├── GenericRepository.js
+│   │   ├── PetRepository.js
+│   │   └── UserRepository.js
+│   ├── routes/                 # API routes
+│   │   ├── adoption.router.js
+│   │   ├── mocks.router.js
+│   │   ├── pets.router.js
+│   │   ├── sessions.router.js
+│   │   └── users.router.js
+│   ├── services/               # Business logic
+│   │   └── index.js
+│   └── utils/                  # Utility functions
+│       ├── index.js
+│       └── uploader.js
+├── test/                       # Test files
+│   └── supertest.test.js
+├── .env                        # Environment variables (create this)
+├── package.json               # Project dependencies
+└── README.md                  # Project documentation
+```
+
+## Available Scripts
+
+From `package.json:7-11`, the following npm scripts are available:
+
+| Script | Command | Description |
+|--------|---------|-------------|
+| `npm start` | `node src/app.js` | Start the production server |
+| `npm run dev` | `nodemon src/app.js` | Start development server with auto-reload |
+| `npm test` | `mocha test/supertest.test.js --exit` | Run the test suite |
+
+## Verification
+
+Verify your installation is working correctly:
+
+### 1. Check Server Health
+
+Access the Swagger documentation:
+
+```bash
+http://localhost:8080/docs
+```
+
+### 2. Test API Endpoints
+
+Get all pets:
+
+```bash
+curl http://localhost:8080/api/pets
+```
+
+Expected response:
+```json
+{
+  "status": "success",
+  "payload": []
+}
+```
+
+### 3. Generate Mock Data
+
+Create test data:
+
+```bash
+curl -X POST "http://localhost:8080/api/mocks/mockingpets?num=10"
+curl -X POST "http://localhost:8080/api/mocks/mockingusers?num=10"
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Error: Cannot find module">
+    This usually means dependencies weren't installed correctly.
+
+    **Solution:**
+    ```bash
+    rm -rf node_modules package-lock.json
+    npm install
+    ```
+  </Accordion>
+
+  <Accordion title="MongoDB connection refused">
+    MongoDB is not running or the connection string is incorrect.
+
+    **Solution:**
+    ```bash
+    # Check if MongoDB is running
+    sudo systemctl status mongod
+
+    # Start MongoDB
+    sudo systemctl start mongod
+
+    # Verify connection string in .env
+    cat .env | grep MONGO_URL
+    ```
+  </Accordion>
+
+  <Accordion title="Port already in use">
+    Another process is using the specified port.
+
+    **Solution:**
+    ```bash
+    # Find process using port 8080
+    lsof -i :8080
+
+    # Kill the process or change PORT in .env
+    PORT=3000
+    ```
+  </Accordion>
+
+  <Accordion title="Node version error: SyntaxError">
+    You're using an older version of Node.js that doesn't support ES modules.
+
+    **Solution:**
+    ```bash
+    # Check your Node version
+    node --version
+
+    # Install Node 22+ from nodejs.org or use nvm
+    nvm install 22
+    nvm use 22
+    ```
+  </Accordion>
+
+  <Accordion title="Docker: Cannot connect to MongoDB">
+    Docker container cannot reach MongoDB on host machine.
+
+    **Solution:**
+    ```bash
+    # Use host.docker.internal instead of localhost
+    docker run -e MONGO_URL=mongodb://host.docker.internal:27017 ...
+
+    # Or run MongoDB in Docker too
+    docker-compose up
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+Now that you have Adoptme API installed:
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Make your first API calls and explore features
+  </Card>
+  <Card title="API Reference" icon="book" href="/api-reference/overview">
+    Browse complete endpoint documentation
+  </Card>
+  <Card title="Authentication" icon="shield" href="/guides/authentication">
+    Learn about JWT authentication and security
+  </Card>
+  <Card title="Docker Deployment" icon="cloud" href="/development/docker">
+    Deploy to production with Docker or Railway
+  </Card>
+</CardGroup>
+
+## Production Considerations
+
+<Warning>
+Before deploying to production:
+
+1. **Never commit `.env` files** - Add `.env` to `.gitignore`
+2. **Use strong JWT secrets** - Generate secure random strings
+3. **Restrict MongoDB access** - Use IP whitelisting and strong passwords
+4. **Enable CORS properly** - Configure allowed origins
+5. **Use HTTPS** - Never send credentials over plain HTTP
+6. **Set up monitoring** - Use logging and error tracking services
+7. **Regular backups** - Schedule MongoDB backups
+</Warning>
+
+## Support
+
+Need help with installation?
+
+- **GitHub Issues**: [Report installation problems](https://github.com/GitRepoFabi/coderhouse-backendIII/issues)
+- **Documentation**: Review the [Quickstart Guide](/quickstart)
+- **Live Demo**: Test the [production API](https://coderhouse-backendiii-production.up.railway.app/docs)

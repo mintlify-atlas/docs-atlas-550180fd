@@ -1,0 +1,94 @@
+---
+title: "Delete User"
+api: "DELETE /api/users/:uid"
+description: "Delete a user from the system"
+---
+
+Permanently delete a user from the system by providing their user ID. This operation removes the user record from the database.
+
+## Path Parameters
+
+<ParamField path="uid" type="string" required>
+  The unique identifier (MongoDB ObjectId) of the user to delete.
+</ParamField>
+
+## Response
+
+<ResponseField name="status" type="string">
+  Status of the response. Returns "success" on successful deletion or "error" on failures.
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Confirmation message. Returns "User deleted" on successful deletion.
+</ResponseField>
+
+<ResponseField name="error" type="string">
+  Error message returned when the user is not found or an error occurs.
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl --location --request DELETE 'http://localhost:8080/api/users/6893eaba2ac0b16fa177be7a' \
+  --header 'Accept: application/json'
+```
+
+```javascript JavaScript
+const userId = '6893eaba2ac0b16fa177be7a';
+const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
+  method: 'DELETE',
+  headers: {
+    'Accept': 'application/json'
+  }
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+```python Python
+import requests
+
+user_id = '6893eaba2ac0b16fa177be7a'
+url = f'http://localhost:8080/api/users/{user_id}'
+
+response = requests.delete(url)
+print(response.json())
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Success
+{
+  "status": "success",
+  "message": "User deleted"
+}
+```
+
+```json 404 - User Not Found
+{
+  "status": "error",
+  "error": "User not found"
+}
+```
+
+```json 500 - Server Error
+"Ha ocurrido un error en la petición, por favor ver detalle: [error details]"
+```
+</ResponseExample>
+
+## Error Responses
+
+<ResponseField name="404" type="error">
+  User not found. The provided user ID does not match any existing user in the database.
+</ResponseField>
+
+<ResponseField name="500" type="error">
+  Internal server error. Returns an error message with details about the failure.
+</ResponseField>
+
+## Notes
+
+- This operation is permanent and cannot be undone.
+- The user must exist in the database before attempting to delete.
+- Verify the user ID carefully before performing the deletion.
+- Consider the impact on related data (e.g., associated pets) before deleting a user.

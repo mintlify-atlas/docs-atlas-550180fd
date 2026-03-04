@@ -1,0 +1,448 @@
+---
+title: 'Pet Adoptions'
+description: 'Complete guide to the pet adoption workflow in the AdoptMe API'
+---
+
+## Overview
+
+The AdoptMe API provides a comprehensive adoption system that links users with pets. When an adoption is created, the system automatically updates both the user and pet records to reflect the new relationship.
+
+## Adoption Data Model
+
+The Adoption model is a simple join collection that links users and pets:
+
+```javascript
+{
+  owner: ObjectId,    // Reference to Users collection
+  pet: ObjectId       // Reference to Pets collection
+}
+```
+
+<Note>
+  The Adoption model serves as a permanent record of the adoption relationship. Even if user or pet details change, the adoption record remains immutable.
+</Note>
+
+## How Adoptions Work
+
+When a user adopts a pet, the system performs multiple operations atomically:
+
+<Steps>
+  <Step title="Validate User">
+    Verify the user exists in the system.
+  </Step>
+  <Step title="Validate Pet">
+    Verify the pet exists and is not already adopted.
+  </Step>
+  <Step title="Update User">
+    Add the pet's ID to the user's `pets` array.
+  </Step>
+  <Step title="Update Pet">
+    Set `adopted: true` and assign the `owner` field.
+  </Step>
+  <Step title="Create Adoption Record">
+    Create a permanent adoption record linking the user and pet.
+  </Step>
+</Steps>
+
+## Get All Adoptions
+
+Retrieve a list of all adoptions in the system.
+
+<CodeGroup>
+```bash cURL
+curl -X GET https://api.adoptme.com/api/adoptions
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.adoptme.com/api/adoptions', {
+  method: 'GET'
+});
+
+const data = await response.json();
+console.log(data.payload); // Array of adoptions
+```
+
+```python Python
+import requests
+
+response = requests.get('https://api.adoptme.com/api/adoptions')
+adoptions = response.json()['payload']
+```
+</CodeGroup>
+
+**Response**
+```json
+{
+  "status": "success",
+  "payload": [
+    {
+      "_id": "507f1f77bcf86cd799439013",
+      "owner": "507f1f77bcf86cd799439011",
+      "pet": "507f191e810c19729de860ea"
+    },
+    {
+      "_id": "507f1f77bcf86cd799439014",
+      "owner": "507f1f77bcf86cd799439012",
+      "pet": "507f191e810c19729de860eb"
+    }
+  ]
+}
+```
+
+## Get Adoption by ID
+
+Retrieve details of a specific adoption record.
+
+<CodeGroup>
+```bash cURL
+curl -X GET https://api.adoptme.com/api/adoptions/507f1f77bcf86cd799439013
+```
+
+```javascript JavaScript
+const adoptionId = '507f1f77bcf86cd799439013';
+const response = await fetch(`https://api.adoptme.com/api/adoptions/${adoptionId}`, {
+  method: 'GET'
+});
+
+const data = await response.json();
+console.log(data.payload);
+```
+
+```python Python
+import requests
+
+adoption_id = '507f1f77bcf86cd799439013'
+response = requests.get(f'https://api.adoptme.com/api/adoptions/{adoption_id}')
+adoption = response.json()['payload']
+```
+</CodeGroup>
+
+**Response**
+```json
+{
+  "status": "success",
+  "payload": {
+    "_id": "507f1f77bcf86cd799439013",
+    "owner": "507f1f77bcf86cd799439011",
+    "pet": "507f191e810c19729de860ea"
+  }
+}
+```
+
+**Error Response**
+```json
+{
+  "status": "error",
+  "error": "Adoption not found"
+}
+```
+
+## Create an Adoption
+
+Create a new adoption by linking a user with a pet. This is the core operation of the AdoptMe system.
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://api.adoptme.com/api/adoptions/507f1f77bcf86cd799439011/507f191e810c19729de860ea
+```
+
+```javascript JavaScript
+const userId = '507f1f77bcf86cd799439011';
+const petId = '507f191e810c19729de860ea';
+
+const response = await fetch(`https://api.adoptme.com/api/adoptions/${userId}/${petId}`, {
+  method: 'POST'
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+user_id = '507f1f77bcf86cd799439011'
+pet_id = '507f191e810c19729de860ea'
+
+response = requests.post(
+    f'https://api.adoptme.com/api/adoptions/{user_id}/{pet_id}'
+)
+
+data = response.json()
+```
+</CodeGroup>
+
+**Response**
+```json
+{
+  "status": "success",
+  "message": "Pet adopted"
+}
+```
+
+### What Happens During Adoption
+
+When you create an adoption, the system automatically performs these updates:
+
+1. **User Update**:
+```javascript
+// Before adoption
+{
+  "_id": "507f1f77bcf86cd799439011",
+  "first_name": "John",
+  "pets": []
+}
+
+// After adoption
+{
+  "_id": "507f1f77bcf86cd799439011",
+  "first_name": "John",
+  "pets": [
+    { "_id": "507f191e810c19729de860ea" }
+  ]
+}
+```
+
+2. **Pet Update**:
+```javascript
+// Before adoption
+{
+  "_id": "507f191e810c19729de860ea",
+  "name": "Max",
+  "adopted": false,
+  "owner": null
+}
+
+// After adoption
+{
+  "_id": "507f191e810c19729de860ea",
+  "name": "Max",
+  "adopted": true,
+  "owner": "507f1f77bcf86cd799439011"
+}
+```
+
+3. **Adoption Record Created**:
+```javascript
+{
+  "_id": "507f1f77bcf86cd799439013",
+  "owner": "507f1f77bcf86cd799439011",
+  "pet": "507f191e810c19729de860ea"
+}
+```
+
+## Error Handling
+
+The adoption endpoint performs comprehensive validation:
+
+### User Not Found
+```json
+{
+  "status": "error",
+  "error": "user Not found"
+}
+```
+
+### Pet Not Found
+```json
+{
+  "status": "error",
+  "error": "Pet not found"
+}
+```
+
+### Pet Already Adopted
+```json
+{
+  "status": "error",
+  "error": "Pet is already adopted"
+}
+```
+
+<Warning>
+  The adoption endpoint checks if the pet is already adopted before proceeding. Attempting to adopt an already-adopted pet will result in an error. Always check the pet's `adopted` status before attempting an adoption.
+</Warning>
+
+## Adoption Workflow Examples
+
+### Complete Adoption Flow
+
+<Steps>
+  <Step title="User Registration">
+    User creates an account via `/api/sessions/register`.
+  </Step>
+  <Step title="Browse Available Pets">
+    User retrieves pets via `/api/pets` and filters for `adopted: false`.
+  </Step>
+  <Step title="Select a Pet">
+    User chooses a pet they want to adopt.
+  </Step>
+  <Step title="Create Adoption">
+    POST to `/api/adoptions/:uid/:pid` to complete the adoption.
+  </Step>
+  <Step title="Verify Adoption">
+    Check user's `pets` array and pet's `adopted` status to confirm.
+  </Step>
+</Steps>
+
+### Finding User's Adopted Pets
+
+```javascript
+// Get user details including pets array
+const userId = '507f1f77bcf86cd799439011';
+const userResponse = await fetch(`https://api.adoptme.com/api/users/${userId}`);
+const userData = await userResponse.json();
+
+// Get all pets
+const petsResponse = await fetch('https://api.adoptme.com/api/pets');
+const petsData = await petsResponse.json();
+
+// Filter for user's adopted pets
+const userPetIds = userData.payload.pets.map(p => p._id);
+const userPets = petsData.payload.filter(pet => 
+  userPetIds.includes(pet._id)
+);
+
+console.log(userPets);
+```
+
+### Finding All Adoptions for a User
+
+```javascript
+const userId = '507f1f77bcf86cd799439011';
+
+// Get all adoptions
+const response = await fetch('https://api.adoptme.com/api/adoptions');
+const data = await response.json();
+
+// Filter for user's adoptions
+const userAdoptions = data.payload.filter(
+  adoption => adoption.owner === userId
+);
+
+console.log(userAdoptions);
+```
+
+### Checking Pet Availability
+
+```javascript
+const petId = '507f191e810c19729de860ea';
+
+// Get pet details
+const response = await fetch('https://api.adoptme.com/api/pets');
+const data = await response.json();
+
+const pet = data.payload.find(p => p._id === petId);
+
+if (pet.adopted) {
+  console.log('This pet has already been adopted');
+} else {
+  console.log('This pet is available for adoption');
+}
+```
+
+## Implementation Details
+
+### Route Definition
+
+The adoption endpoints are implemented in the adoption router:
+
+```javascript
+// GET /api/adoptions - Get all adoptions
+router.get('/', adoptionsController.getAllAdoptions);
+
+// GET /api/adoptions/:aid - Get adoption by ID
+router.get('/:aid', adoptionsController.getAdoption);
+
+// POST /api/adoptions/:uid/:pid - Create adoption
+router.post('/:uid/:pid', adoptionsController.createAdoption);
+```
+
+### URL Parameters
+
+- `:aid` - Adoption ID (MongoDB ObjectId)
+- `:uid` - User ID (MongoDB ObjectId)
+- `:pid` - Pet ID (MongoDB ObjectId)
+
+### Service Layer Operations
+
+The adoption creation process uses multiple services:
+
+```javascript
+// 1. Validate user
+const user = await usersService.getUserById(uid);
+
+// 2. Validate pet
+const pet = await petsService.getBy({_id: pid});
+
+// 3. Check if pet is already adopted
+if (pet.adopted) {
+  return error;
+}
+
+// 4. Update user's pets array
+user.pets.push(pet._id);
+await usersService.update(user._id, {pets: user.pets});
+
+// 5. Update pet's status and owner
+await petsService.update(pet._id, {adopted: true, owner: user._id});
+
+// 6. Create adoption record
+await adoptionsService.create({owner: user._id, pet: pet._id});
+```
+
+<Note>
+  The adoption creation is not wrapped in a database transaction in the current implementation. In production, consider using MongoDB transactions to ensure all updates succeed or roll back together.
+</Note>
+
+## Best Practices
+
+### Pre-Adoption Checks
+
+Before creating an adoption, always:
+
+<Steps>
+  <Step title="Verify User Authentication">
+    Ensure the user is logged in and authorized.
+  </Step>
+  <Step title="Check Pet Availability">
+    Verify the pet's `adopted` status is `false`.
+  </Step>
+  <Step title="Validate IDs">
+    Ensure both user ID and pet ID are valid MongoDB ObjectIds.
+  </Step>
+  <Step title="Handle Errors Gracefully">
+    Provide clear error messages to users when adoption fails.
+  </Step>
+</Steps>
+
+### Data Consistency
+
+To maintain data consistency:
+
+- Never manually update pet's `adopted` status without creating an adoption record
+- Never manually add pets to user's `pets` array without using the adoption endpoint
+- Use the adoption endpoint to ensure all related records are updated together
+
+## Common HTTP Status Codes
+
+- `200` - Success
+- `400` - Bad request (pet already adopted)
+- `404` - User or pet not found
+- `500` - Server error
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="User Management" icon="users" href="/guides/users">
+    Learn about managing user accounts
+  </Card>
+  <Card title="Pet Management" icon="paw" href="/guides/pets">
+    Understand how to manage pets
+  </Card>
+  <Card title="Authentication" icon="lock" href="/guides/authentication">
+    Set up user authentication
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/adoptions/get-all">
+    View complete adoption API endpoints
+  </Card>
+</CardGroup>

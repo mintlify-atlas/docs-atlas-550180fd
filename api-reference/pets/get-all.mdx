@@ -1,0 +1,107 @@
+---
+title: "Get All Pets"
+api: "GET /api/pets"
+description: "Retrieve a list of all pets in the system"
+---
+
+This endpoint returns all pets registered in the adoption system.
+
+### Response
+
+<ResponseField name="status" type="string">
+  The status of the response. Returns `"success"` on successful retrieval.
+</ResponseField>
+
+<ResponseField name="payload" type="array">
+  Array of pet objects.
+  
+  <ResponseField name="_id" type="string">
+    The unique identifier for the pet.
+  </ResponseField>
+  
+  <ResponseField name="name" type="string">
+    The name of the pet.
+  </ResponseField>
+  
+  <ResponseField name="specie" type="string">
+    The species of the pet (e.g., "dog", "cat", "bird").
+  </ResponseField>
+  
+  <ResponseField name="birthDate" type="string">
+    The birth date of the pet in ISO 8601 format.
+  </ResponseField>
+  
+  <ResponseField name="adopted" type="boolean">
+    Whether the pet has been adopted. Defaults to `false`.
+  </ResponseField>
+  
+  <ResponseField name="owner" type="string" optional>
+    The ID of the user who adopted the pet. Only present if `adopted` is `true`.
+  </ResponseField>
+  
+  <ResponseField name="image" type="string" optional>
+    The file path to the pet's image.
+  </ResponseField>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl --request GET \
+  --url https://api.adoptme.com/api/pets
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.adoptme.com/api/pets', {
+  method: 'GET'
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get('https://api.adoptme.com/api/pets')
+data = response.json()
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 Response
+{
+  "status": "success",
+  "payload": [
+    {
+      "_id": "507f1f77bcf86cd799439011",
+      "name": "Max",
+      "specie": "dog",
+      "birthDate": "2020-05-15T00:00:00.000Z",
+      "adopted": false,
+      "image": "/public/img/1678901234567-max.jpg"
+    },
+    {
+      "_id": "507f1f77bcf86cd799439012",
+      "name": "Luna",
+      "specie": "cat",
+      "birthDate": "2021-03-22T00:00:00.000Z",
+      "adopted": true,
+      "owner": "507f1f77bcf86cd799439020",
+      "image": "/public/img/1678901234568-luna.jpg"
+    },
+    {
+      "_id": "507f1f77bcf86cd799439013",
+      "name": "Tweety",
+      "specie": "bird",
+      "birthDate": "2022-01-10T00:00:00.000Z",
+      "adopted": false
+    }
+  ]
+}
+```
+
+```json 500 Error
+{
+  "error": "Ha ocurrido un error en la petición, por favor ver detalle: ..."
+}
+```
+</ResponseExample>

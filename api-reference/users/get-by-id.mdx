@@ -1,0 +1,113 @@
+---
+title: "Get User by ID"
+api: "GET /api/users/:uid"
+description: "Retrieve a specific user by their unique identifier"
+---
+
+Retrieve detailed information about a specific user by providing their user ID. This endpoint returns the user's complete profile including associated pets.
+
+## Path Parameters
+
+<ParamField path="uid" type="string" required>
+  The unique identifier (MongoDB ObjectId) of the user to retrieve.
+</ParamField>
+
+## Response
+
+<ResponseField name="status" type="string">
+  Status of the response. Returns "success" on successful requests or "error" on failures.
+</ResponseField>
+
+<ResponseField name="payload" type="object">
+  User object containing all user information.
+  
+  <ResponseField name="_id" type="string">
+    Unique identifier for the user (MongoDB ObjectId).
+  </ResponseField>
+  
+  <ResponseField name="first_name" type="string" required>
+    User's first name.
+  </ResponseField>
+  
+  <ResponseField name="last_name" type="string" required>
+    User's last name.
+  </ResponseField>
+  
+  <ResponseField name="email" type="string" required>
+    User's email address (unique).
+  </ResponseField>
+  
+  <ResponseField name="password" type="string" required>
+    User's password (hashed).
+  </ResponseField>
+  
+  <ResponseField name="role" type="string">
+    User's role in the system. Defaults to "user".
+  </ResponseField>
+  
+  <ResponseField name="pets" type="array">
+    Array of pet references associated with the user.
+  </ResponseField>
+</ResponseField>
+
+<ResponseField name="error" type="string">
+  Error message returned when the user is not found or an error occurs.
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl --location 'http://localhost:8080/api/users/6893eaba2ac0b16fa177be7a' \
+  --header 'Accept: application/json'
+```
+
+```javascript JavaScript
+const userId = '6893eaba2ac0b16fa177be7a';
+const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
+  method: 'GET',
+  headers: {
+    'Accept': 'application/json'
+  }
+});
+
+const data = await response.json();
+console.log(data);
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Success
+{
+  "status": "success",
+  "payload": {
+    "_id": "6893eaba2ac0b16fa177be7a",
+    "first_name": "Jerónimo",
+    "last_name": "Arroyo Alonzo",
+    "email": "Jeronimo_ArroyoAlonzo63@gmail.com",
+    "password": "xjkkakjsiz",
+    "role": "user",
+    "pets": []
+  }
+}
+```
+
+```json 404 - User Not Found
+{
+  "status": "error",
+  "error": "User not found"
+}
+```
+
+```json 500 - Server Error
+"Ha ocurrido un error en la petición, por favor ver detalle: [error details]"
+```
+</ResponseExample>
+
+## Error Responses
+
+<ResponseField name="404" type="error">
+  User not found. The provided user ID does not match any existing user in the database.
+</ResponseField>
+
+<ResponseField name="500" type="error">
+  Internal server error. Returns an error message with details about the failure.
+</ResponseField>

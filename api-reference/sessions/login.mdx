@@ -1,0 +1,125 @@
+---
+title: 'Login User'
+api: 'POST /api/sessions/login'
+description: 'Authenticate a user and receive a JWT token via HTTP-only cookie'
+---
+
+## Request
+
+Authenticates a user with their email and password. Upon successful authentication, a JWT token is issued and stored in an HTTP-only cookie named `coderCookie`.
+
+<ParamField body="email" type="string" required>
+  User's email address
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  User's password
+</ParamField>
+
+### Request Example
+
+```json
+{
+  "email": "john.doe@example.com",
+  "password": "securePassword123"
+}
+```
+
+## Response
+
+<ResponseField name="status" type="string">
+  Status of the request ("success" or "error")
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Confirmation message upon successful login
+</ResponseField>
+
+### Success Response
+
+```json
+{
+  "status": "success",
+  "message": "Logged in"
+}
+```
+
+### Error Responses
+
+<ResponseExample>
+```json Incomplete Values (400)
+{
+  "status": "error",
+  "error": "Incomplete values"
+}
+```
+
+```json User Not Found (404)
+{
+  "status": "error",
+  "error": "User doesn't exist"
+}
+```
+
+```json Incorrect Password (400)
+{
+  "status": "error",
+  "error": "Incorrect password"
+}
+```
+
+```json Server Error (500)
+{
+  "status": "error",
+  "error": "Ha ocurrido un error en la petición, por favor ver detalle: [error details]"
+}
+```
+</ResponseExample>
+
+## Implementation Details
+
+### JWT Token Generation
+
+Upon successful authentication, a JWT token is generated with the following payload:
+
+```javascript
+{
+  "name": "John Doe",
+  "role": "user",
+  "email": "john.doe@example.com"
+}
+```
+
+The token is signed with the secret `tokenSecretJWT` and expires in 1 hour:
+
+```javascript
+const token = jwt.sign(userDto, 'tokenSecretJWT', {expiresIn: "1h"});
+```
+
+### Cookie Configuration
+
+The JWT token is stored in a cookie with the following settings:
+
+- **Cookie Name**: `coderCookie`
+- **Max Age**: 3600000ms (1 hour)
+- **HTTP-Only**: Yes (cookie is not accessible via JavaScript)
+
+```javascript
+res.cookie('coderCookie', token, {maxAge: 3600000})
+```
+
+### Password Verification
+
+Passwords are verified using bcrypt's compare function:
+
+```javascript
+const isValidPassword = await bcrypt.compare(password, user.password);
+```
+
+### User Data Transfer Object (DTO)
+
+The JWT token contains a sanitized version of the user data:
+- Full name (concatenated first_name and last_name)
+- User role (defaults to "user")
+- Email address
+- Password is explicitly excluded from the token

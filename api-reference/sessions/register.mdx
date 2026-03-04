@@ -1,0 +1,99 @@
+---
+title: 'Register User'
+api: 'POST /api/sessions/register'
+description: 'Create a new user account with bcrypt password hashing'
+---
+
+## Request
+
+Creates a new user account with the provided information. Passwords are securely hashed using bcrypt with 10 salt rounds before storage.
+
+<ParamField body="first_name" type="string" required>
+  User's first name
+</ParamField>
+
+<ParamField body="last_name" type="string" required>
+  User's last name
+</ParamField>
+
+<ParamField body="email" type="string" required>
+  User's email address (must be unique)
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  User's password (will be hashed with bcrypt)
+</ParamField>
+
+### Request Example
+
+```json
+{
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "john.doe@example.com",
+  "password": "securePassword123"
+}
+```
+
+## Response
+
+<ResponseField name="status" type="string">
+  Status of the request ("success" or "error")
+</ResponseField>
+
+<ResponseField name="payload" type="string">
+  The MongoDB ObjectId of the newly created user
+</ResponseField>
+
+### Success Response
+
+```json
+{
+  "status": "success",
+  "payload": "507f1f77bcf86cd799439011"
+}
+```
+
+### Error Responses
+
+<ResponseExample>
+```json Incomplete Values (400)
+{
+  "status": "error",
+  "error": "Incomplete values"
+}
+```
+
+```json User Already Exists (400)
+{
+  "status": "error",
+  "error": "User already exists"
+}
+```
+
+```json Server Error (500)
+{
+  "status": "error",
+  "error": "Ha ocurrido un error en la petición, por favor ver detalle: [error details]"
+}
+```
+</ResponseExample>
+
+## Implementation Details
+
+### Password Hashing
+
+Passwords are hashed using bcrypt with the following implementation:
+
+```javascript
+const salts = await bcrypt.genSalt(10);
+const hashedPassword = await bcrypt.hash(password, salts);
+```
+
+The system uses 10 salt rounds for a secure balance between security and performance.
+
+### Validation
+
+- All fields (first_name, last_name, email, password) are required
+- Email must be unique across the system
+- Duplicate emails return a 400 error

@@ -1,0 +1,395 @@
+---
+title: 'User Management'
+description: 'Complete guide to managing users in the AdoptMe API'
+---
+
+## Overview
+
+The AdoptMe API provides comprehensive user management capabilities including retrieving user information, updating profiles, and managing user accounts. Users can have multiple adopted pets tracked through references.
+
+## User Data Model
+
+The User model contains the following fields:
+
+```javascript
+{
+  first_name: String,    // Required
+  last_name: String,     // Required
+  email: String,         // Required, unique
+  password: String,      // Required, bcrypt hashed
+  role: String,          // Default: 'user'
+  pets: [ObjectId]       // Array of Pet references, default: []
+}
+```
+
+<Note>
+  The `pets` array stores ObjectId references to the Pets collection. When a user adopts a pet, the pet's ID is automatically added to this array.
+</Note>
+
+## Get All Users
+
+Retrieve a list of all registered users.
+
+<CodeGroup>
+```bash cURL
+curl -X GET https://api.adoptme.com/api/users \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.adoptme.com/api/users', {
+  method: 'GET',
+  credentials: 'include'
+});
+
+const data = await response.json();
+console.log(data.payload); // Array of users
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.adoptme.com/api/users',
+    cookies={'coderCookie': 'YOUR_JWT_TOKEN'}
+)
+
+users = response.json()['payload']
+```
+</CodeGroup>
+
+**Response**
+```json
+{
+  "status": "success",
+  "payload": [
+    {
+      "_id": "507f1f77bcf86cd799439011",
+      "first_name": "John",
+      "last_name": "Doe",
+      "email": "john.doe@example.com",
+      "role": "user",
+      "pets": [
+        {
+          "_id": "507f191e810c19729de860ea"
+        }
+      ]
+    },
+    {
+      "_id": "507f1f77bcf86cd799439012",
+      "first_name": "Jane",
+      "last_name": "Smith",
+      "email": "jane.smith@example.com",
+      "role": "user",
+      "pets": []
+    }
+  ]
+}
+```
+
+## Get User by ID
+
+Retrieve detailed information about a specific user.
+
+<CodeGroup>
+```bash cURL
+curl -X GET https://api.adoptme.com/api/users/507f1f77bcf86cd799439011 \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+```javascript JavaScript
+const userId = '507f1f77bcf86cd799439011';
+const response = await fetch(`https://api.adoptme.com/api/users/${userId}`, {
+  method: 'GET',
+  credentials: 'include'
+});
+
+const data = await response.json();
+console.log(data.payload);
+```
+
+```python Python
+import requests
+
+user_id = '507f1f77bcf86cd799439011'
+response = requests.get(
+    f'https://api.adoptme.com/api/users/{user_id}',
+    cookies={'coderCookie': 'YOUR_JWT_TOKEN'}
+)
+
+user = response.json()['payload']
+```
+</CodeGroup>
+
+**Response**
+```json
+{
+  "status": "success",
+  "payload": {
+    "_id": "507f1f77bcf86cd799439011",
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "john.doe@example.com",
+    "role": "user",
+    "pets": [
+      {
+        "_id": "507f191e810c19729de860ea"
+      }
+    ]
+  }
+}
+```
+
+**Error Response**
+```json
+{
+  "status": "error",
+  "error": "User not found"
+}
+```
+
+<Note>
+  User IDs are MongoDB ObjectIds. Make sure to use valid ObjectId format when making requests.
+</Note>
+
+## Update User
+
+Update an existing user's information. You can update any field except the `_id`.
+
+<CodeGroup>
+```bash cURL
+curl -X PUT https://api.adoptme.com/api/users/507f1f77bcf86cd799439011 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "first_name": "Jonathan",
+    "last_name": "Doe"
+  }'
+```
+
+```javascript JavaScript
+const userId = '507f1f77bcf86cd799439011';
+const response = await fetch(`https://api.adoptme.com/api/users/${userId}`, {
+  method: 'PUT',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  credentials: 'include',
+  body: JSON.stringify({
+    first_name: 'Jonathan',
+    last_name: 'Doe'
+  })
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+user_id = '507f1f77bcf86cd799439011'
+response = requests.put(
+    f'https://api.adoptme.com/api/users/{user_id}',
+    json={
+        'first_name': 'Jonathan',
+        'last_name': 'Doe'
+    },
+    cookies={'coderCookie': 'YOUR_JWT_TOKEN'}
+)
+
+data = response.json()
+```
+</CodeGroup>
+
+**Response**
+```json
+{
+  "status": "success",
+  "message": "User updated"
+}
+```
+
+### Updatable Fields
+
+You can update the following user fields:
+- `first_name` - User's first name
+- `last_name` - User's last name
+- `email` - User's email address
+- `role` - User's role in the system
+- `pets` - Array of pet references (usually managed automatically through adoptions)
+
+<Warning>
+  When updating the `pets` array manually, ensure you pass the complete array including existing pets. The update operation replaces the entire array.
+</Warning>
+
+**Error Response**
+```json
+{
+  "status": "error",
+  "error": "User not found"
+}
+```
+
+## Delete User
+
+Permanently delete a user account from the system.
+
+<CodeGroup>
+```bash cURL
+curl -X DELETE https://api.adoptme.com/api/users/507f1f77bcf86cd799439011 \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+```javascript JavaScript
+const userId = '507f1f77bcf86cd799439011';
+const response = await fetch(`https://api.adoptme.com/api/users/${userId}`, {
+  method: 'DELETE',
+  credentials: 'include'
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+user_id = '507f1f77bcf86cd799439011'
+response = requests.delete(
+    f'https://api.adoptme.com/api/users/{user_id}',
+    cookies={'coderCookie': 'YOUR_JWT_TOKEN'}
+)
+
+data = response.json()
+```
+</CodeGroup>
+
+**Response**
+```json
+{
+  "status": "success",
+  "message": "User deleted"
+}
+```
+
+**Error Response**
+```json
+{
+  "status": "error",
+  "error": "User not found"
+}
+```
+
+<Warning>
+  Deleting a user is a permanent action and cannot be undone. Make sure to handle any related data (adopted pets, adoption records) appropriately before deletion.
+</Warning>
+
+## User Workflow Examples
+
+### Complete User Lifecycle
+
+<Steps>
+  <Step title="Create Account">
+    User registers through the `/api/sessions/register` endpoint.
+  </Step>
+  <Step title="Login">
+    User authenticates and receives a JWT token.
+  </Step>
+  <Step title="View Profile">
+    User retrieves their profile using `/api/users/:uid`.
+  </Step>
+  <Step title="Update Information">
+    User updates their profile details.
+  </Step>
+  <Step title="Adopt Pets">
+    Pet IDs are automatically added to the user's `pets` array during adoption.
+  </Step>
+  <Step title="Delete Account">
+    User can permanently delete their account if needed.
+  </Step>
+</Steps>
+
+### Managing User Pets
+
+When a user adopts a pet, the system automatically:
+1. Adds the pet's ObjectId to the user's `pets` array
+2. Updates the user record with the new pets array
+3. Creates an adoption record linking the user and pet
+
+```javascript
+// Example: User's pets array after adoption
+{
+  "_id": "507f1f77bcf86cd799439011",
+  "first_name": "John",
+  "pets": [
+    { "_id": "507f191e810c19729de860ea" },
+    { "_id": "507f191e810c19729de860eb" }
+  ]
+}
+```
+
+## Error Handling
+
+All user endpoints follow consistent error handling patterns:
+
+### Common HTTP Status Codes
+
+- `200` - Success
+- `400` - Bad request (invalid data)
+- `404` - User not found
+- `500` - Server error
+
+### Error Response Format
+
+```json
+{
+  "status": "error",
+  "error": "Descriptive error message"
+}
+```
+
+## Implementation Details
+
+### Route Definitions
+
+The user endpoints are implemented in the users router:
+
+```javascript
+// GET /api/users - Get all users
+router.get('/', usersController.getAllUsers);
+
+// GET /api/users/:uid - Get user by ID
+router.get('/:uid', usersController.getUser);
+
+// PUT /api/users/:uid - Update user
+router.put('/:uid', usersController.updateUser);
+
+// DELETE /api/users/:uid - Delete user
+router.delete('/:uid', usersController.deleteUser);
+```
+
+### Service Layer
+
+The controller uses the `usersService` which provides:
+- `getAll()` - Retrieve all users
+- `getUserById(id)` - Get user by ID
+- `getUserByEmail(email)` - Get user by email
+- `create(user)` - Create new user
+- `update(id, data)` - Update user
+- `delete(user)` - Delete user
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Pet Management" icon="paw" href="/guides/pets">
+    Learn how to manage pets in the system
+  </Card>
+  <Card title="Adoptions" icon="heart" href="/guides/adoptions">
+    Understand the adoption workflow
+  </Card>
+  <Card title="Authentication" icon="lock" href="/guides/authentication">
+    Set up user authentication
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/users/get-all">
+    View complete user API endpoints
+  </Card>
+</CardGroup>

@@ -1,0 +1,138 @@
+---
+title: "Update User"
+api: "PUT /api/users/:uid"
+description: "Update an existing user's information"
+---
+
+Update the information of an existing user by providing their user ID and the fields to update. This endpoint allows you to modify user details such as name, email, password, and role.
+
+## Path Parameters
+
+<ParamField path="uid" type="string" required>
+  The unique identifier (MongoDB ObjectId) of the user to update.
+</ParamField>
+
+## Request Body
+
+<ParamField body="first_name" type="string">
+  User's first name.
+</ParamField>
+
+<ParamField body="last_name" type="string">
+  User's last name.
+</ParamField>
+
+<ParamField body="email" type="string">
+  User's email address. Must be unique across all users.
+</ParamField>
+
+<ParamField body="password" type="string">
+  User's password.
+</ParamField>
+
+<ParamField body="role" type="string">
+  User's role in the system (e.g., "user", "admin").
+</ParamField>
+
+<ParamField body="pets" type="array">
+  Array of pet references to associate with the user. Each item should contain an `_id` field with the pet's ObjectId.
+</ParamField>
+
+## Response
+
+<ResponseField name="status" type="string">
+  Status of the response. Returns "success" on successful updates or "error" on failures.
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Confirmation message. Returns "User updated" on successful updates.
+</ResponseField>
+
+<ResponseField name="error" type="string">
+  Error message returned when the user is not found or an error occurs.
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl --location --request PUT 'http://localhost:8080/api/users/6893eaba2ac0b16fa177be7a' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+    "first_name": "Jerónimo",
+    "last_name": "Arroyo Alonzo",
+    "email": "jeronimo.updated@gmail.com",
+    "role": "admin"
+  }'
+```
+
+```javascript JavaScript
+const userId = '6893eaba2ac0b16fa177be7a';
+const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
+  method: 'PUT',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    first_name: 'Jerónimo',
+    last_name: 'Arroyo Alonzo',
+    email: 'jeronimo.updated@gmail.com',
+    role: 'admin'
+  })
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+```python Python
+import requests
+
+user_id = '6893eaba2ac0b16fa177be7a'
+url = f'http://localhost:8080/api/users/{user_id}'
+
+payload = {
+    'first_name': 'Jerónimo',
+    'last_name': 'Arroyo Alonzo',
+    'email': 'jeronimo.updated@gmail.com',
+    'role': 'admin'
+}
+
+response = requests.put(url, json=payload)
+print(response.json())
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Success
+{
+  "status": "success",
+  "message": "User updated"
+}
+```
+
+```json 404 - User Not Found
+{
+  "status": "error",
+  "error": "User not found"
+}
+```
+
+```json 500 - Server Error
+"Ha ocurrido un error en la petición, por favor ver detalle: [error details]"
+```
+</ResponseExample>
+
+## Error Responses
+
+<ResponseField name="404" type="error">
+  User not found. The provided user ID does not match any existing user in the database.
+</ResponseField>
+
+<ResponseField name="500" type="error">
+  Internal server error. Returns an error message with details about the failure.
+</ResponseField>
+
+## Notes
+
+- Only provide the fields you want to update in the request body. Fields not included will remain unchanged.
+- Email addresses must be unique. Attempting to update to an existing email will result in an error.
+- The user must exist in the database before attempting to update.

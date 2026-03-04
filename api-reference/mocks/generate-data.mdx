@@ -1,0 +1,186 @@
+---
+title: 'Generate and Persist Mock Data'
+api: 'POST /api/mocks/generateData'
+---
+
+Generates and persists mock users and pets to the database in a single operation. Uses @faker-js to create realistic test data with Spanish (Mexico) locale. Generated pets can be automatically assigned to generated users if they have `adopted: true`.
+
+## Query Parameters
+
+<ParamField query="user" type="integer" default="1">
+  Number of mock users to generate and insert into the database. Must be a positive integer.
+</ParamField>
+
+<ParamField query="pet" type="integer" default="1">
+  Number of mock pets to generate and insert into the database. Must be a positive integer.
+</ParamField>
+
+## Response
+
+<ResponseField name="message" type="string">
+  Success message: "Datos generados exitosamente"
+</ResponseField>
+
+<ResponseField name="users" type="array">
+  Array of inserted user documents with MongoDB `_id` fields
+  
+  <ResponseField name="_id" type="string">
+    MongoDB ObjectId of the inserted user
+  </ResponseField>
+  
+  <ResponseField name="first_name" type="string">
+    User's first name generated using faker
+  </ResponseField>
+  
+  <ResponseField name="last_name" type="string">
+    User's last name generated using faker
+  </ResponseField>
+  
+  <ResponseField name="email" type="string">
+    Email address generated from first and last name with @gmail.com domain
+  </ResponseField>
+  
+  <ResponseField name="password" type="string">
+    Hashed password (default: 'coder123' encrypted)
+  </ResponseField>
+  
+  <ResponseField name="role" type="string">
+    User role, randomly assigned as either 'user' or 'admin'
+  </ResponseField>
+  
+  <ResponseField name="pets" type="array">
+    Empty array of pets (populated separately)
+  </ResponseField>
+</ResponseField>
+
+<ResponseField name="pets" type="array">
+  Array of inserted pet documents with MongoDB `_id` fields
+  
+  <ResponseField name="_id" type="string">
+    MongoDB ObjectId of the inserted pet
+  </ResponseField>
+  
+  <ResponseField name="name" type="string">
+    Pet name generated using faker
+  </ResponseField>
+  
+  <ResponseField name="specie" type="string">
+    Animal species/type generated using faker
+  </ResponseField>
+  
+  <ResponseField name="birthDate" type="string">
+    Birth date randomly generated between ages 18-65
+  </ResponseField>
+  
+  <ResponseField name="adopted" type="boolean">
+    Adoption status randomly assigned
+  </ResponseField>
+  
+  <ResponseField name="image" type="string">
+    Avatar URL generated using faker
+  </ResponseField>
+  
+  <ResponseField name="owner" type="string" optional>
+    MongoDB ObjectId reference to a user. Only present if `adopted: true`. Randomly assigned from generated users.
+  </ResponseField>
+</ResponseField>
+
+<ResponseField name="error" type="string">
+  Error message when validation fails or server error occurs
+</ResponseField>
+
+## Faker-js Integration
+
+This endpoint uses [@faker-js/faker](https://fakerjs.dev/) with Spanish (Mexico) locale to generate realistic test data:
+
+**For Users:**
+- **Names**: `fa.person.firstName()` and `fa.person.lastName()`
+- **Emails**: `fa.internet.email()` based on generated names
+- **Roles**: `fa.helpers.arrayElement(['user', 'admin'])`
+- **Password**: Hashed using bcrypt with default value 'coder123'
+
+**For Pets:**
+- **Pet names**: `fa.animal.petName()`
+- **Species**: `fa.animal.type()`
+- **Birth dates**: `fa.date.birthdate({ mode: 'age', min: 18, max: 65 })`
+- **Adoption status**: `fa.datatype.boolean()`
+- **Images**: `fa.image.avatar()`
+
+## Auto-Assignment Logic
+
+When pets are generated with `adopted: true`, they are automatically assigned to a random user from the batch of generated users. The pet's `owner` field is set to the MongoDB `_id` of the randomly selected user.
+
+This creates realistic test scenarios where:
+- Some pets are available for adoption (`adopted: false`, no owner)
+- Other pets are already adopted (`adopted: true`, with owner reference)
+
+## Validation
+
+- Both `user` and `pet` parameters must be positive numbers
+- Negative values return a 400 error with message "Cantidad enviada debe de ser positiva"
+- Missing parameters default to 1 for each resource type
+- Database insertion errors return a 500 error
+
+<RequestExample>
+```bash Generate 10 users and 20 pets
+curl -X POST "http://localhost:8080/api/mocks/generateData?user=10&pet=20"
+```
+
+```bash Generate batch with defaults
+curl -X POST "http://localhost:8080/api/mocks/generateData"
+```
+
+```bash Generate 50 users and 100 pets
+curl -X POST "http://localhost:8080/api/mocks/generateData?user=50&pet=100"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response (201)
+{
+  "message": "Datos generados exitosamente",
+  "users": [
+    {
+      "_id": "6893eaba2ac0b16fa177be7a",
+      "first_name": "Jerónimo",
+      "last_name": "Arroyo Alonzo",
+      "email": "Jeronimo_ArroyoAlonzo63@gmail.com",
+      "password": "$2b$10$8kJZ9K4z...",
+      "role": "user",
+      "pets": []
+    }
+  ],
+  "pets": [
+    {
+      "_id": "6893eaba2ac0b16fa177be7b",
+      "name": "Max",
+      "specie": "Dog",
+      "birthDate": "1995-03-15T00:00:00.000Z",
+      "adopted": true,
+      "image": "https://avatars.githubusercontent.com/u/12345",
+      "owner": "6893eaba2ac0b16fa177be7a"
+    },
+    {
+      "_id": "6893eaba2ac0b16fa177be7c",
+      "name": "Luna",
+      "specie": "Cat",
+      "birthDate": "2000-07-22T00:00:00.000Z",
+      "adopted": false,
+      "image": "https://avatars.githubusercontent.com/u/67890"
+    }
+  ]
+}
+```
+
+```json Error Response (400)
+{
+  "error": "Cantidad enviada debe de ser positiva"
+}
+```
+
+```json Error Response (500)
+{
+  "error": "Error interno del servidor"
+}
+```
+</ResponseExample>

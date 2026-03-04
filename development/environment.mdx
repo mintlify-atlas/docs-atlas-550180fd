@@ -1,0 +1,430 @@
+---
+title: Environment Setup
+description: Configure your development environment and environment variables for the Adoptme API
+---
+
+## Overview
+
+The Adoptme API requires specific environment variables and system dependencies to run properly. This guide will help you set up your development environment correctly.
+
+## System Requirements
+
+### Node.js Version
+
+The Adoptme API requires **Node.js version 22 or higher**.
+
+<Steps>
+  <Step title="Check your Node.js version">
+    ```bash
+    node --version
+    ```
+    
+    You should see output like `v22.x.x` or higher.
+  </Step>
+
+  <Step title="Install or update Node.js (if needed)">
+    If you need to install or update Node.js:
+    
+    - Download from [nodejs.org](https://nodejs.org/)
+    - Or use a version manager like [nvm](https://github.com/nvm-sh/nvm):
+    
+    ```bash
+    nvm install 22
+    nvm use 22
+    ```
+  </Step>
+</Steps>
+
+<Warning>
+  Using a Node.js version lower than 22 may cause compatibility issues and unexpected behavior.
+</Warning>
+
+### MongoDB
+
+You'll need access to a MongoDB database, either:
+- Local MongoDB installation
+- MongoDB Atlas cloud database
+- Docker container running MongoDB
+
+## Installation
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/GitRepoFabi/coderhouse-backendIII.git .
+    ```
+  </Step>
+
+  <Step title="Install dependencies">
+    ```bash
+    npm install
+    ```
+    
+    This will install all required packages listed in `package.json`.
+  </Step>
+
+  <Step title="Configure environment variables">
+    Create a `.env` file in the project root (see [Environment Variables](#environment-variables) section below).
+  </Step>
+
+  <Step title="Start the application">
+    ```bash
+    npm start
+    ```
+  </Step>
+</Steps>
+
+## Environment Variables
+
+The Adoptme API uses environment variables for configuration. Create a `.env` file in the project root directory.
+
+### Required Variables
+
+<CodeGroup>
+```bash .env (Local Development)
+PORT=3000
+MONGO_URL=mongodb://localhost:27017
+DB_NAME=adoptme
+```
+
+```bash .env (MongoDB Atlas)
+PORT=3000
+MONGO_URL=mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority
+DB_NAME=adoptme
+```
+
+```bash .env (Docker MongoDB)
+PORT=3000
+MONGO_URL=mongodb://mongo:27017
+DB_NAME=adoptme
+```
+</CodeGroup>
+
+### Environment Variable Reference
+
+| Variable | Type | Required | Description | Example |
+|----------|------|----------|-------------|----------|
+| `PORT` | Number | Yes | Port number for the API server | `3000` |
+| `MONGO_URL` | String | Yes | MongoDB connection string | `mongodb://localhost:27017` |
+| `DB_NAME` | String | Yes | MongoDB database name | `adoptme` |
+
+<Note>
+  The application will fail to start if any required environment variables are missing. Always ensure your `.env` file is properly configured before running the application.
+</Note>
+
+### Accessing Environment Variables
+
+The application uses the `dotenv` package to load environment variables. In the code, they're accessed via the config module:
+
+```javascript src/config/config.js
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+export default {
+    PORT: process.env.PORT,
+    MONGO_URL: process.env.MONGO_URL,
+    DB_NAME: process.env.DB_NAME
+};
+```
+
+## Available Scripts
+
+The project includes several npm scripts for different tasks:
+
+### Development Scripts
+
+<CodeGroup>
+```bash Start (Production)
+npm start
+```
+
+```bash Development Mode
+npm run dev
+```
+
+```bash Run Tests
+npm test
+```
+</CodeGroup>
+
+### Script Details
+
+| Script | Command | Description |
+|--------|---------|-------------|
+| `start` | `node src/app.js` | Starts the application in production mode |
+| `dev` | `nodemon src/app.js` | Starts the application with auto-reload on file changes |
+| `test` | `mocha test/supertest.test.js --exit` | Runs the test suite |
+
+<Note>
+  The `dev` script requires `nodemon` to be installed. It's included in the project dependencies, but if you encounter issues, install it globally: `npm install -g nodemon`
+</Note>
+
+## Project Dependencies
+
+The Adoptme API uses the following key dependencies:
+
+### Core Dependencies
+
+```json package.json
+{
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^6.7.5",
+    "dotenv": "^17.2.2",
+    "bcrypt": "^5.1.0",
+    "jsonwebtoken": "^8.5.1",
+    "cookie-parser": "^1.4.6",
+    "multer": "^1.4.5-lts.1",
+    "@faker-js/faker": "^9.9.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "supertest": "^6.3.3"
+  }
+}
+```
+
+### Development Dependencies
+
+```json package.json
+{
+  "devDependencies": {
+    "chai": "^4.3.7",
+    "mocha": "^10.1.0"
+  }
+}
+```
+
+### Dependency Overview
+
+<Accordion title="Web Framework & API">
+  - **express**: Fast, minimalist web framework for Node.js
+  - **swagger-jsdoc**: Generate OpenAPI documentation from JSDoc comments
+  - **swagger-ui-express**: Serve auto-generated API documentation
+</Accordion>
+
+<Accordion title="Database">
+  - **mongoose**: MongoDB object modeling tool for Node.js
+</Accordion>
+
+<Accordion title="Authentication & Security">
+  - **bcrypt**: Password hashing library
+  - **jsonwebtoken**: JSON Web Token implementation
+  - **cookie-parser**: Parse Cookie header and populate req.cookies
+</Accordion>
+
+<Accordion title="File Upload">
+  - **multer**: Middleware for handling multipart/form-data (file uploads)
+</Accordion>
+
+<Accordion title="Testing">
+  - **mocha**: Test framework
+  - **chai**: Assertion library
+  - **supertest**: HTTP assertion library for API testing
+</Accordion>
+
+<Accordion title="Utilities">
+  - **dotenv**: Load environment variables from .env file
+  - **@faker-js/faker**: Generate fake data for testing and development
+</Accordion>
+
+## Configuration File
+
+The application uses a centralized configuration approach. Environment variables are loaded and exported through a config module:
+
+```javascript src/config/config.js
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const config = {
+    PORT: process.env.PORT || 3000,
+    MONGO_URL: process.env.MONGO_URL,
+    DB_NAME: process.env.DB_NAME
+};
+
+export default config;
+```
+
+This pattern provides:
+- **Centralized configuration**: All config in one place
+- **Default values**: Fallback values for optional settings
+- **Type safety**: Easy to add validation or type conversion
+- **Testability**: Easy to mock in tests
+
+## Development Workflow
+
+<Steps>
+  <Step title="Start development server">
+    ```bash
+    npm run dev
+    ```
+    
+    This starts the server with nodemon, which automatically restarts when you make changes.
+  </Step>
+
+  <Step title="Make your changes">
+    Edit files in the `src/` directory. The server will automatically reload.
+  </Step>
+
+  <Step title="Test your changes">
+    Run the test suite to ensure everything works:
+    
+    ```bash
+    npm test
+    ```
+  </Step>
+
+  <Step title="Check API documentation">
+    Visit `http://localhost:3000/docs` to see the Swagger API documentation.
+  </Step>
+</Steps>
+
+## Common Development Scenarios
+
+### Setting up for local development
+
+<CodeGroup>
+```bash .env
+PORT=3000
+MONGO_URL=mongodb://localhost:27017
+DB_NAME=adoptme_dev
+```
+
+```bash Start local MongoDB
+mongod --dbpath /path/to/data
+```
+
+```bash Run in dev mode
+npm run dev
+```
+</CodeGroup>
+
+### Setting up for testing
+
+<CodeGroup>
+```bash .env.test
+PORT=3001
+MONGO_URL=mongodb://localhost:27017
+DB_NAME=adoptme_test
+```
+
+```bash Load test environment
+export NODE_ENV=test
+```
+
+```bash Run tests
+npm test
+```
+</CodeGroup>
+
+### Setting up for production
+
+<CodeGroup>
+```bash .env.production
+PORT=3000
+MONGO_URL=your_production_mongodb_url
+DB_NAME=adoptme_production
+```
+
+```bash Build and start
+npm start
+```
+</CodeGroup>
+
+## Troubleshooting
+
+<Accordion title="Application won't start">
+  **Symptom**: Application crashes immediately on startup
+  
+  **Solution**:
+  1. Check that all environment variables are set in `.env`
+  2. Verify MongoDB is running and accessible
+  3. Ensure you're using Node.js version 22 or higher
+  4. Check the console for specific error messages
+</Accordion>
+
+<Accordion title="Cannot connect to MongoDB">
+  **Symptom**: Error messages about MongoDB connection failures
+  
+  **Solution**:
+  1. Verify MongoDB is running: `systemctl status mongod` (Linux) or check Docker container
+  2. Test connection string with mongo shell: `mongosh "your_connection_string"`
+  3. Check firewall settings
+  4. For Atlas: Ensure your IP is whitelisted
+  5. For local: Ensure MongoDB is bound to the correct interface
+</Accordion>
+
+<Accordion title="Port already in use">
+  **Symptom**: Error: `EADDRINUSE: address already in use`
+  
+  **Solution**:
+  1. Change the `PORT` in your `.env` file
+  2. Or stop the process using the port:
+     ```bash
+     # Find process using port 3000
+     lsof -i :3000
+     # Kill the process
+     kill -9 <PID>
+     ```
+</Accordion>
+
+<Accordion title="Module not found errors">
+  **Symptom**: Error: `Cannot find module 'package-name'`
+  
+  **Solution**:
+  1. Delete `node_modules` and `package-lock.json`
+  2. Reinstall dependencies: `npm install`
+  3. Ensure you're using Node.js version 22 or higher
+</Accordion>
+
+<Accordion title="Tests failing">
+  **Symptom**: Test suite reports failures
+  
+  **Solution**:
+  1. Ensure the API server is running: `npm start`
+  2. Check that test database is accessible
+  3. Verify environment variables are set correctly
+  4. Review test output for specific error messages
+  5. See the [Testing](/development/testing) guide for more details
+</Accordion>
+
+## Environment Best Practices
+
+1. **Never commit `.env` files** to version control
+   - Add `.env` to `.gitignore`
+   - Provide a `.env.example` file with dummy values
+
+2. **Use different databases for different environments**
+   - Development: `adoptme_dev`
+   - Testing: `adoptme_test`
+   - Production: `adoptme_production`
+
+3. **Validate environment variables on startup**
+   - Check that all required variables are present
+   - Fail fast if configuration is invalid
+
+4. **Use strong credentials in production**
+   - Generate secure passwords for MongoDB
+   - Use environment-specific JWT secrets
+   - Enable MongoDB authentication
+
+5. **Document all environment variables**
+   - Keep this guide up to date
+   - Provide examples for different scenarios
+   - Explain the purpose of each variable
+
+## Additional Resources
+
+- [MongoDB Installation Guide](https://docs.mongodb.com/manual/installation/)
+- [Node.js Documentation](https://nodejs.org/docs/)
+- [Express.js Best Practices](https://expressjs.com/en/advanced/best-practice-performance.html)
+- [dotenv Documentation](https://github.com/motdotla/dotenv#readme)
+
+## Next Steps
+
+Now that your environment is set up:
+
+1. [Run the tests](/development/testing) to verify everything works
+2. [Build a Docker image](/development/docker) for containerized deployment
+3. [Explore the API endpoints](/api-reference/introduction) in the API reference

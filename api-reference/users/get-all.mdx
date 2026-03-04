@@ -1,0 +1,106 @@
+---
+title: "Get All Users"
+api: "GET /api/users"
+description: "Retrieve a list of all users in the system"
+---
+
+Retrieve a list of all users registered in the Adoptme platform. This endpoint returns all user records with their associated information including pets.
+
+## Response
+
+<ResponseField name="status" type="string">
+  Status of the response. Returns "success" on successful requests.
+</ResponseField>
+
+<ResponseField name="payload" type="array">
+  Array of user objects.
+  
+  <ResponseField name="_id" type="string">
+    Unique identifier for the user (MongoDB ObjectId).
+  </ResponseField>
+  
+  <ResponseField name="first_name" type="string" required>
+    User's first name.
+  </ResponseField>
+  
+  <ResponseField name="last_name" type="string" required>
+    User's last name.
+  </ResponseField>
+  
+  <ResponseField name="email" type="string" required>
+    User's email address (unique).
+  </ResponseField>
+  
+  <ResponseField name="password" type="string" required>
+    User's password (hashed).
+  </ResponseField>
+  
+  <ResponseField name="role" type="string">
+    User's role in the system. Defaults to "user".
+  </ResponseField>
+  
+  <ResponseField name="pets" type="array">
+    Array of pet references associated with the user. Each item contains a pet ID referencing the Pets collection.
+  </ResponseField>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl --location 'http://localhost:8080/api/users' \
+  --header 'Accept: application/json'
+```
+
+```javascript JavaScript
+const response = await fetch('http://localhost:8080/api/users', {
+  method: 'GET',
+  headers: {
+    'Accept': 'application/json'
+  }
+});
+
+const data = await response.json();
+console.log(data);
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Success
+{
+  "status": "success",
+  "payload": [
+    {
+      "_id": "6893eaba2ac0b16fa177be7a",
+      "first_name": "Jerónimo",
+      "last_name": "Arroyo Alonzo",
+      "email": "Jeronimo_ArroyoAlonzo63@gmail.com",
+      "password": "xjkkakjsiz",
+      "role": "user",
+      "pets": []
+    },
+    {
+      "_id": "6893eaba2ac0b16fa177be7b",
+      "first_name": "María",
+      "last_name": "González",
+      "email": "maria.gonzalez@example.com",
+      "password": "hashedpassword123",
+      "role": "user",
+      "pets": [
+        {
+          "_id": "6893eaba2ac0b16fa177be8a"
+        }
+      ]
+    }
+  ]
+}
+```
+
+```json 500 - Server Error
+"Ha ocurrido un error en la petición, por favor ver detalle: [error details]"
+```
+</ResponseExample>
+
+## Error Responses
+
+<ResponseField name="500" type="error">
+  Internal server error. Returns an error message with details about the failure.
+</ResponseField>

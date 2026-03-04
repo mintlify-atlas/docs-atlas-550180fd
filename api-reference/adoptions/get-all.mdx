@@ -1,0 +1,72 @@
+---
+title: "Get All Adoptions"
+api: "GET /api/adoptions"
+description: "Retrieve a list of all adoptions in the system"
+---
+
+This endpoint returns all adoption records, showing the relationships between users and the pets they have adopted.
+
+## Response
+
+<ResponseField name="status" type="string" required>
+  The status of the response. Returns "success" on successful retrieval.
+</ResponseField>
+
+<ResponseField name="payload" type="array" required>
+  An array of adoption objects.
+  
+  <ResponseField name="_id" type="string" required>
+    The unique identifier for the adoption record.
+  </ResponseField>
+  
+  <ResponseField name="owner" type="string" required>
+    The ObjectId reference to the User who adopted the pet.
+  </ResponseField>
+  
+  <ResponseField name="pet" type="string" required>
+    The ObjectId reference to the Pet that was adopted.
+  </ResponseField>
+</ResponseField>
+
+## Response Example
+
+```json
+{
+  "status": "success",
+  "payload": [
+    {
+      "_id": "65a1b2c3d4e5f6789abcdef0",
+      "owner": "65a1b2c3d4e5f6789abcdef1",
+      "pet": "65a1b2c3d4e5f6789abcdef2"
+    },
+    {
+      "_id": "65a1b2c3d4e5f6789abcdef3",
+      "owner": "65a1b2c3d4e5f6789abcdef4",
+      "pet": "65a1b2c3d4e5f6789abcdef5"
+    }
+  ]
+}
+```
+
+## Understanding Adoption Records
+
+Each adoption record creates a permanent link between a user and a pet:
+- The `owner` field references the user's `_id` in the Users collection
+- The `pet` field references the pet's `_id` in the Pets collection
+- When an adoption is created, the pet's `adopted` status is set to `true` and the pet is added to the user's `pets` array
+
+## Error Responses
+
+<ResponseField name="status" type="number">
+  HTTP status code for errors.
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Error message describing what went wrong.
+</ResponseField>
+
+### 500 Internal Server Error
+
+```json
+"Ha ocurrido un error en la petición, por favor ver detalle: [error details]"
+```

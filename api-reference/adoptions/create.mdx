@@ -1,0 +1,117 @@
+---
+title: "Create Adoption"
+api: "POST /api/adoptions/:uid/:pid"
+description: "Create a new adoption record linking a user with a pet"
+---
+
+This endpoint processes a pet adoption, creating the relationship between a user and a pet. It performs several operations atomically:
+
+1. Validates that both the user and pet exist
+2. Checks that the pet is not already adopted
+3. Adds the pet to the user's `pets` array
+4. Updates the pet's `adopted` status to `true` and sets the `owner` field
+5. Creates a new adoption record
+
+## Path Parameters
+
+<ParamField path="uid" type="string" required>
+  The unique identifier (ObjectId) of the user who is adopting the pet.
+</ParamField>
+
+<ParamField path="pid" type="string" required>
+  The unique identifier (ObjectId) of the pet being adopted.
+</ParamField>
+
+## How the Adoption Process Works
+
+When a successful adoption is created, the following updates occur:
+
+### User Record Update
+- The pet's `_id` is added to the user's `pets` array
+- This allows tracking all pets owned by a specific user
+
+### Pet Record Update
+- The pet's `adopted` field is set to `true`
+- The pet's `owner` field is set to the user's `_id`
+- This prevents the pet from being adopted by another user
+
+### Adoption Record Creation
+- A new adoption document is created with:
+  - `owner`: The user's ObjectId
+  - `pet`: The pet's ObjectId
+- This creates a permanent record of the adoption transaction
+
+## Response
+
+<ResponseField name="status" type="string" required>
+  The status of the response. Returns "success" when the adoption is completed.
+</ResponseField>
+
+<ResponseField name="message" type="string" required>
+  A confirmation message. Returns "Pet adopted" on success.
+</ResponseField>
+
+## Response Example
+
+```json
+{
+  "status": "success",
+  "message": "Pet adopted"
+}
+```
+
+## Error Responses
+
+### 404 User Not Found
+
+Returned when the specified user ID does not exist in the database.
+
+```json
+{
+  "status": "error",
+  "error": "user Not found"
+}
+```
+
+### 404 Pet Not Found
+
+Returned when the specified pet ID does not exist in the database.
+
+```json
+{
+  "status": "error",
+  "error": "Pet not found"
+}
+```
+
+### 400 Pet Already Adopted
+
+Returned when attempting to adopt a pet that has already been adopted by another user.
+
+```json
+{
+  "status": "error",
+  "error": "Pet is already adopted"
+}
+```
+
+### 500 Internal Server Error
+
+Returned when a server error occurs during the adoption process.
+
+```json
+"Ha ocurrido un error en la petición, por favor ver detalle: [error details]"
+```
+
+## Example Usage
+
+To adopt a pet, make a POST request with the user ID and pet ID in the path:
+
+```bash
+POST /api/adoptions/65a1b2c3d4e5f6789abcdef1/65a1b2c3d4e5f6789abcdef2
+```
+
+This will:
+- Link pet `65a1b2c3d4e5f6789abcdef2` to user `65a1b2c3d4e5f6789abcdef1`
+- Update both records in their respective collections
+- Create a new adoption record documenting the transaction

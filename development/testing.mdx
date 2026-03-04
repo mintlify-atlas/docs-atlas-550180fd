@@ -1,0 +1,290 @@
+---
+title: Testing
+description: Learn how to run and write tests for the Adoptme API using Mocha, Chai, and Supertest
+---
+
+## Overview
+
+The Adoptme API uses a comprehensive testing suite built with industry-standard tools:
+
+- **Mocha**: Test framework for organizing and running tests
+- **Chai**: Assertion library for writing test expectations
+- **Supertest**: HTTP assertion library for testing API endpoints
+
+## Test Setup
+
+### Dependencies
+
+The following testing dependencies are included in the project:
+
+```json package.json
+"devDependencies": {
+  "chai": "^4.3.7",
+  "mocha": "^10.1.0"
+},
+"dependencies": {
+  "supertest": "^6.3.3"
+}
+```
+
+### Test Configuration
+
+Tests are configured to run with a 10-second timeout and automatically clean up test data after execution.
+
+```javascript test/supertest.test.js
+import { describe, it } from "mocha";
+import supertest from "supertest";
+import { expect } from "chai";
+import config from "../src/config/config.js";
+import mongoose from "mongoose";
+
+const requester = supertest(`http://localhost:${config.PORT}`);
+await mongoose.connect(config.MONGO_URL, {dbName: config.DB_NAME});
+```
+
+## Running Tests
+
+<Steps>
+  <Step title="Start the API server">
+    Before running tests, ensure your API server is running:
+    
+    ```bash
+    npm start
+    ```
+  </Step>
+
+  <Step title="Run the test suite">
+    Execute all tests with a single command:
+    
+    ```bash
+    npm test
+    ```
+    
+    This command runs `mocha test/supertest.test.js --exit`
+  </Step>
+
+  <Step title="Review test results">
+    The test output will show:
+    - Number of passing tests
+    - Number of failing tests
+    - Execution time for each test
+    - Any error messages or stack traces
+  </Step>
+</Steps>
+
+<Note>
+  Tests require an active MongoDB connection. Ensure your `MONGO_URL` and `DB_NAME` environment variables are properly configured before running tests.
+</Note>
+
+## Test Structure
+
+### Pets Router Tests
+
+The pets router test suite validates all pet-related endpoints:
+
+<Accordion title="GET /api/pets - Retrieve all pets">
+  ```javascript
+  it("Si consulto todas las mascotas al endpoint /api/pets metodo GET, me debería devolver un array de mascotas", async() => {
+      let {body} = await requester.get("/api/pets").send()
+      expect(Array(body.payload))
+  })
+  ```
+</Accordion>
+
+<Accordion title="POST /api/pets - Create a new pet">
+  ```javascript
+  it("Si envío los datos correctos de una mascota al /api/pets metodo POST, da de alta la mascota en DB", async()=>{
+      let petMock={
+          name: "Rocky", 
+          specie: "test", 
+          birthDate: new Date(2025, 11, 18).toUTCString()
+      }
+
+      let {status, body}=await requester.post("/api/pets").send(petMock)
+      expect(status).to.be.eq(200)
+      expect(body.payload).to.has.property("_id")
+      expect(isValidObjectId(body.payload._id)).to.be.true
+  })
+  ```
+</Accordion>
+
+<Accordion title="Validation Tests - Missing required fields">
+  The test suite validates that required fields are enforced:
+  
+  ```javascript
+  // Test missing 'name' field
+  it("Si envío los datos de la mascota sin el campo name al /api/pets metodo POST, me debería dar un error", async()=>{
+      let petMock={
+          specie: "test", 
+          birthDate: new Date(2025, 11, 18).toUTCString()
+      }
+      let {status}=await requester.post("/api/pets").send(petMock)
+      expect(status).to.be.eq(400)
+  })
+  ```
+  
+  Similar tests validate the `specie` and `birthDate` fields.
+</Accordion>
+
+### Users Router Tests
+
+The users router test suite includes:
+
+<Accordion title="GET /api/users - Retrieve all users">
+  ```javascript
+  it("Si consulto todos los usuarios al endpoint /api/users metodo GET, me debería devolver un array de usuarios", async() => {
+      let {body} = await requester.get("/api/users").send()
+      expect(Array(body.payload))
+  })
+  ```
+</Accordion>
+
+<Accordion title="POST /api/mocks/generateData - Generate mock data">
+  ```javascript
+  it("Si quiero generar 1 usuario y 1 mascota, al apuntar al endpoint /api/mocks/generateData metodo POST sin pasarle cantidad, da de alta 1 usuario y 1 mascota en DB", async() => {
+      let {status, body}=await requester.post(`/api/mocks/generateData`).send()
+      expect(status).to.be.eq(201)
+      expect(Array(body))
+      expect(body.message).to.be.eq("Datos generados exitosamente")
+  })
+  ```
+</Accordion>
+
+<Accordion title="Generate N users and pets">
+  ```javascript
+  it("Si quiero generar N usuarios y N mascotas, al apuntar al endpoint /api/mocks/generateData metodo POST pasándole la cantidad deseada, da de alta los N usuarios y las N mascotas en DB", async() => {
+      let usuarios=3
+      let mascotas=3
+
+      let {status, body}=await requester.post(`/api/mocks/generateData/?user=${usuarios}&pets=${mascotas}`).send()
+      expect(status).to.be.eq(201)
+      expect(Array(body))
+      expect(body.message).to.be.eq("Datos generados exitosamente")
+  })
+  ```
+</Accordion>
+
+## Test Cleanup
+
+Tests automatically clean up test data after execution using Mocha's `after` hook:
+
+```javascript
+after(async()=>{
+    await mongoose.connection.collection("pets").deleteMany({specie:"test"})
+})
+```
+
+This ensures that test data doesn't pollute your database between test runs.
+
+## Writing New Tests
+
+When adding new tests, follow these best practices:
+
+<Steps>
+  <Step title="Create a descriptive test suite">
+    Use `describe` to group related tests:
+    
+    ```javascript
+    describe("Pruebas router adoption", function(){
+        this.timeout(10_000)
+        // Your tests here
+    })
+    ```
+  </Step>
+
+  <Step title="Write clear test descriptions">
+    Use descriptive test names that explain the expected behavior:
+    
+    ```javascript
+    it("Si creo una adopción válida, debería retornar status 200", async() => {
+        // Test implementation
+    })
+    ```
+  </Step>
+
+  <Step title="Use proper assertions">
+    Leverage Chai's expressive assertion syntax:
+    
+    ```javascript
+    expect(status).to.be.eq(200)
+    expect(body).to.has.property("_id")
+    expect(Array.isArray(body.payload)).to.be.true
+    ```
+  </Step>
+
+  <Step title="Clean up test data">
+    Add cleanup logic in the `after` hook:
+    
+    ```javascript
+    after(async()=>{
+        await mongoose.connection.collection("your_collection").deleteMany({test: true})
+    })
+    ```
+  </Step>
+</Steps>
+
+<Warning>
+  Always ensure your tests use test-specific data (like `specie: "test"`) to avoid accidentally deleting production data during cleanup.
+</Warning>
+
+## Common Patterns
+
+### Testing API Endpoints
+
+```javascript
+const requester = supertest(`http://localhost:${config.PORT}`);
+
+// GET request
+let {body, status} = await requester.get("/api/endpoint").send();
+
+// POST request with data
+let response = await requester.post("/api/endpoint").send(mockData);
+
+// Assert status codes
+expect(status).to.be.eq(200);
+
+// Assert response structure
+expect(body).to.has.property("payload");
+```
+
+### Validating MongoDB ObjectIds
+
+```javascript
+import { isValidObjectId } from "mongoose";
+
+expect(isValidObjectId(body.payload._id)).to.be.true;
+```
+
+### Testing Error Conditions
+
+```javascript
+// Test with invalid data
+let {status} = await requester.post("/api/pets").send(invalidData);
+expect(status).to.be.eq(400);
+```
+
+## Troubleshooting
+
+<Accordion title="Tests timing out">
+  If your tests are timing out, increase the timeout value:
+  
+  ```javascript
+  describe("Your test suite", function(){
+      this.timeout(15_000) // 15 seconds
+  })
+  ```
+</Accordion>
+
+<Accordion title="Connection errors">
+  Ensure your MongoDB connection is active and the environment variables are correctly set:
+  
+  ```bash
+  MONGO_URL=mongodb://localhost:27017
+  DB_NAME=adoptme
+  PORT=3000
+  ```
+</Accordion>
+
+<Accordion title="Tests failing after database changes">
+  Update your test mocks to match the new schema requirements and ensure cleanup logic targets the correct collections.
+</Accordion>

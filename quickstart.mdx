@@ -1,80 +1,335 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart
+description: Get started with Adoptme API in under 5 minutes - from installation to your first API call
 ---
 
-## Get started in three steps
+# Quickstart Guide
 
-Get your documentation site running locally and make your first customization.
+Get up and running with Adoptme API in just a few minutes. This guide will walk you through the essentials to make your first API call.
 
-### Step 1: Set up your local environment
+## Prerequisites
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
+Before you begin, ensure you have:
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Node.js 22+" icon="node-js">
+    Check your version with `node --version`
+  </Card>
+  <Card title="MongoDB" icon="database">
+    Local instance or MongoDB Atlas connection
+  </Card>
 </CardGroup>
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+**Check your Node.js version**: Run `node --version` in your terminal. If you have an older version, download Node.js 22 or higher from [nodejs.org](https://nodejs.org/).
 </Note>
+
+## Quick Setup
+
+<Steps>
+  <Step title="Clone the Repository">
+    Clone the Adoptme API repository to your local machine:
+
+    ```bash
+    git clone https://github.com/GitRepoFabi/coderhouse-backendIII.git .
+    ```
+  </Step>
+
+  <Step title="Install Dependencies">
+    Install all required npm packages:
+
+    ```bash
+    npm install
+    ```
+
+    This will install all dependencies including:
+    - Express.js for the web framework
+    - Mongoose for MongoDB interactions
+    - JWT and bcrypt for authentication
+    - Swagger for API documentation
+  </Step>
+
+  <Step title="Configure Environment Variables">
+    Create a `.env` file in the root directory with your configuration:
+
+    ```bash
+    PORT=8080
+    MONGO_URL=mongodb://127.0.0.1:27017
+    DB_NAME=adoptme
+    ```
+
+    <Accordion title="Environment Variables Explained">
+      - **PORT**: The port number where the server will run (default: 8080)
+      - **MONGO_URL**: Your MongoDB connection string
+      - **DB_NAME**: The name of the database to use (default: adoptme)
+
+      <Note>
+      If you're using MongoDB Atlas, your `MONGO_URL` will look like:
+      ```
+      mongodb+srv://username:password@cluster.mongodb.net/
+      ```
+      </Note>
+    </Accordion>
+  </Step>
+
+  <Step title="Start the Server">
+    Launch the API server:
+
+    ```bash
+    npm start
+    ```
+
+    You should see:
+    ```
+    Connection successful MongoDB
+    Listening on 8080
+    ```
+
+    <Note>
+    For development with auto-reload, use `npm run dev` instead. This uses nodemon to automatically restart the server when you make changes.
+    </Note>
+  </Step>
+</Steps>
+
+## Your First API Call
+
+Now that the server is running, let's make your first API call!
+
+### Get All Pets
+
+Fetch all pets from the database:
+
+<CodeGroup>
+```bash cURL
+curl http://localhost:8080/api/pets
+```
+
+```javascript JavaScript (Fetch)
+const response = await fetch('http://localhost:8080/api/pets');
+const data = await response.json();
+console.log(data);
+```
+
+```python Python
+import requests
+
+response = requests.get('http://localhost:8080/api/pets')
+data = response.json()
+print(data)
+```
+</CodeGroup>
+
+**Response:**
+```json
+{
+  "status": "success",
+  "payload": []
+}
+```
+
+### Create a Pet
+
+Add a new pet to the database:
+
+<CodeGroup>
+```bash cURL
+curl -X POST http://localhost:8080/api/pets \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Max",
+    "specie": "Dog",
+    "birthDate": "2020-05-15"
+  }'
+```
+
+```javascript JavaScript (Fetch)
+const response = await fetch('http://localhost:8080/api/pets', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    name: 'Max',
+    specie: 'Dog',
+    birthDate: '2020-05-15'
+  })
+});
+
+const data = await response.json();
+console.log(data);
+```
+
+```python Python
+import requests
+import json
+
+payload = {
+    "name": "Max",
+    "specie": "Dog",
+    "birthDate": "2020-05-15"
+}
+
+response = requests.post(
+    'http://localhost:8080/api/pets',
+    headers={'Content-Type': 'application/json'},
+    data=json.dumps(payload)
+)
+
+data = response.json()
+print(data)
+```
+</CodeGroup>
+
+**Response:**
+```json
+{
+  "status": "success",
+  "payload": {
+    "_id": "507f1f77bcf86cd799439011",
+    "name": "Max",
+    "specie": "Dog",
+    "birthDate": "2020-05-15T00:00:00.000Z",
+    "adopted": false
+  }
+}
+```
+
+### Register a User
+
+Create a new user account:
+
+<CodeGroup>
+```bash cURL
+curl -X POST http://localhost:8080/api/sessions/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "john.doe@example.com",
+    "password": "securepassword123"
+  }'
+```
+
+```javascript JavaScript (Fetch)
+const response = await fetch('http://localhost:8080/api/sessions/register', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    first_name: 'John',
+    last_name: 'Doe',
+    email: 'john.doe@example.com',
+    password: 'securepassword123'
+  })
+});
+
+const data = await response.json();
+console.log(data);
+```
+</CodeGroup>
+
+## Generate Mock Data
+
+Quickly populate your database with realistic test data:
+
+```bash
+# Generate 50 mock users
+curl -X POST "http://localhost:8080/api/mocks/mockingusers?num=50"
+
+# Generate 100 mock pets
+curl -X POST "http://localhost:8080/api/mocks/mockingpets?num=100"
+```
+
+<Note>
+Mock data is generated using Faker.js and includes realistic names, emails, and pet information. This is perfect for testing and development!
+</Note>
+
+## Explore the API Documentation
+
+Adoptme includes built-in Swagger documentation for interactive API exploration:
+
+1. Open your browser and navigate to:
+   ```
+   http://localhost:8080/docs
+   ```
+
+2. Browse all available endpoints
+3. Try out API calls directly from the browser
+4. View request/response schemas
+
+<Card title="Interactive API Docs" icon="book" href="http://localhost:8080/docs">
+  Explore all endpoints with Swagger UI
+</Card>
+
+## Next Steps
+
+Now that you have the API running, explore more features:
+
+<CardGroup cols={2}>
+  <Card title="Installation Guide" icon="download" href="/installation">
+    Detailed installation and configuration options
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/overview">
+    Complete API endpoint documentation
+  </Card>
+  <Card title="Authentication" icon="lock" href="/guides/authentication">
+    Learn about JWT authentication and session management
+  </Card>
+  <Card title="Docker Deployment" icon="docker" href="/development/docker">
+    Deploy with Docker and Docker Compose
+  </Card>
+</CardGroup>
+
+## Running Tests
+
+Verify your installation by running the test suite:
+
+```bash
+npm test
+```
+
+This will execute all unit tests using Mocha and Supertest.
+
+<Warning>
+Make sure your MongoDB connection is active before running tests. Some tests require database access.
+</Warning>
+
+## Troubleshooting
+
+<Accordion title="Port already in use">
+  If port 8080 is already in use, change the `PORT` value in your `.env` file:
+  ```bash
+  PORT=3000
+  ```
+</Accordion>
+
+<Accordion title="MongoDB connection failed">
+  Ensure MongoDB is running:
+  ```bash
+  # For local MongoDB
+  sudo systemctl status mongod
+  
+  # Or check if MongoDB process is running
+  ps aux | grep mongod
+  ```
+  
+  Verify your `MONGO_URL` in the `.env` file is correct.
+</Accordion>
+
+<Accordion title="Node version error">
+  If you see module or syntax errors, verify your Node.js version:
+  ```bash
+  node --version
+  ```
+  
+  Adoptme requires Node.js 22 or higher. Update if necessary.
+</Accordion>
+
+## Need Help?
+
+If you encounter any issues:
+
+- Check the [Installation Guide](/installation) for detailed setup instructions
+- Review the [API Reference](/api-reference) for endpoint documentation
+- Visit the [GitHub repository](https://github.com/GitRepoFabi/coderhouse-backendIII) for issues and discussions

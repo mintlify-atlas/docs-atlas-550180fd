@@ -1,0 +1,115 @@
+---
+title: 'Get Current User'
+api: 'GET /api/sessions/current'
+description: 'Retrieve the currently authenticated user from JWT token'
+---
+
+## Request
+
+Retrieves the current user's information by verifying the JWT token stored in the `coderCookie` cookie. No request body is required.
+
+### Authentication
+
+This endpoint requires a valid JWT token stored in the `coderCookie` cookie. The cookie is automatically sent with the request by the browser.
+
+### Request Example
+
+```bash
+curl -X GET https://api.adoptme.com/api/sessions/current \
+  --cookie "coderCookie=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+## Response
+
+<ResponseField name="status" type="string">
+  Status of the request ("success" or "error")
+</ResponseField>
+
+<ResponseField name="payload" type="object">
+  The decoded JWT payload containing user information
+  
+  <ResponseField name="payload.name" type="string">
+    User's full name (first_name + last_name)
+  </ResponseField>
+  
+  <ResponseField name="payload.role" type="string">
+    User's role in the system (e.g., "user", "admin")
+  </ResponseField>
+  
+  <ResponseField name="payload.email" type="string">
+    User's email address
+  </ResponseField>
+  
+  <ResponseField name="payload.iat" type="number">
+    Token issued at timestamp (Unix timestamp)
+  </ResponseField>
+  
+  <ResponseField name="payload.exp" type="number">
+    Token expiration timestamp (Unix timestamp)
+  </ResponseField>
+</ResponseField>
+
+### Success Response
+
+```json
+{
+  "status": "success",
+  "payload": {
+    "name": "John Doe",
+    "role": "user",
+    "email": "john.doe@example.com",
+    "iat": 1709553600,
+    "exp": 1709557200
+  }
+}
+```
+
+### Error Responses
+
+<ResponseExample>
+```json No Cookie/Invalid Token (500)
+{
+  "status": "error",
+  "error": "Ha ocurrido un error en la petición, por favor ver detalle: [error details]"
+}
+```
+
+```json Token Expired (500)
+{
+  "status": "error",
+  "error": "Ha ocurrido un error en la petición, por favor ver detalle: jwt expired"
+}
+```
+</ResponseExample>
+
+## Implementation Details
+
+### JWT Verification
+
+The endpoint extracts and verifies the JWT token from the cookie:
+
+```javascript
+const cookie = req.cookies['coderCookie'];
+const user = jwt.verify(cookie, 'tokenSecretJWT');
+```
+
+### Token Secret
+
+The JWT token is verified using the secret `tokenSecretJWT`.
+
+### Token Expiration
+
+Tokens are valid for 1 hour from issuance. After expiration:
+- The `jwt.verify()` call will throw an error
+- The user will need to login again to obtain a new token
+
+### User Information
+
+The response includes all data from the JWT payload:
+- **name**: Full name (e.g., "John Doe")
+- **role**: User's role (default: "user")
+- **email**: User's email address
+- **iat**: Token issued at (Unix timestamp)
+- **exp**: Token expiration (Unix timestamp)
+
+Note: Sensitive information like passwords are never included in the JWT token.

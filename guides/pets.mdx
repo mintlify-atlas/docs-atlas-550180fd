@@ -1,0 +1,469 @@
+---
+title: 'Pet Management'
+description: 'Learn how to create, update, and manage pets in the AdoptMe API'
+---
+
+## Overview
+
+The AdoptMe API provides comprehensive pet management capabilities including creating pets, uploading images, and tracking adoption status. Pets can be filtered, updated, and managed through a complete CRUD interface.
+
+## Pet Data Model
+
+The Pet model contains the following fields:
+
+```javascript
+{
+  name: String,           // Required - Pet's name
+  specie: String,         // Required - Pet species (dog, cat, etc.)
+  birthDate: Date,        // Pet's birth date
+  adopted: Boolean,       // Default: false - Adoption status
+  owner: ObjectId,        // Reference to Users collection
+  image: String           // Path to pet's image file
+}
+```
+
+<Note>
+  The `owner` field is automatically populated when a pet is adopted through the adoptions workflow. The `adopted` flag is set to `true` at that time.
+</Note>
+
+## Get All Pets
+
+Retrieve a list of all pets in the system, including both available and adopted pets.
+
+<CodeGroup>
+```bash cURL
+curl -X GET https://api.adoptme.com/api/pets
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.adoptme.com/api/pets', {
+  method: 'GET'
+});
+
+const data = await response.json();
+console.log(data.payload); // Array of pets
+```
+
+```python Python
+import requests
+
+response = requests.get('https://api.adoptme.com/api/pets')
+pets = response.json()['payload']
+```
+</CodeGroup>
+
+**Response**
+```json
+{
+  "status": "success",
+  "payload": [
+    {
+      "_id": "507f191e810c19729de860ea",
+      "name": "Max",
+      "specie": "dog",
+      "birthDate": "2020-05-15T00:00:00.000Z",
+      "adopted": false,
+      "image": "/public/img/max.jpg"
+    },
+    {
+      "_id": "507f191e810c19729de860eb",
+      "name": "Luna",
+      "specie": "cat",
+      "birthDate": "2021-03-20T00:00:00.000Z",
+      "adopted": true,
+      "owner": "507f1f77bcf86cd799439011"
+    }
+  ]
+}
+```
+
+## Create a Pet
+
+Add a new pet to the system. The pet is created with `adopted: false` by default.
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://api.adoptme.com/api/pets \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Max",
+    "specie": "dog",
+    "birthDate": "2020-05-15"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.adoptme.com/api/pets', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    name: 'Max',
+    specie: 'dog',
+    birthDate: '2020-05-15'
+  })
+});
+
+const data = await response.json();
+console.log(data.payload); // Created pet object
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.adoptme.com/api/pets',
+    json={
+        'name': 'Max',
+        'specie': 'dog',
+        'birthDate': '2020-05-15'
+    }
+)
+
+pet = response.json()['payload']
+```
+</CodeGroup>
+
+**Response**
+```json
+{
+  "status": "success",
+  "payload": {
+    "_id": "507f191e810c19729de860ea",
+    "name": "Max",
+    "specie": "dog",
+    "birthDate": "2020-05-15T00:00:00.000Z",
+    "adopted": false
+  }
+}
+```
+
+### Required Fields
+
+All three fields are required when creating a pet:
+- `name` - The pet's name
+- `specie` - The pet's species (e.g., dog, cat, bird, rabbit)
+- `birthDate` - The pet's birth date in ISO format or date string
+
+**Error Response**
+```json
+{
+  "status": "error",
+  "error": "Incomplete values"
+}
+```
+
+<Note>
+  Pet data is processed through a PetDTO (Data Transfer Object) that validates and formats the input before storage.
+</Note>
+
+## Create Pet with Image
+
+Create a pet with an uploaded image file. This endpoint accepts multipart form data.
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://api.adoptme.com/api/pets/withimage \
+  -F "name=Max" \
+  -F "specie=dog" \
+  -F "birthDate=2020-05-15" \
+  -F "image=@/path/to/pet-photo.jpg"
+```
+
+```javascript JavaScript
+const formData = new FormData();
+formData.append('name', 'Max');
+formData.append('specie', 'dog');
+formData.append('birthDate', '2020-05-15');
+formData.append('image', fileInput.files[0]);
+
+const response = await fetch('https://api.adoptme.com/api/pets/withimage', {
+  method: 'POST',
+  body: formData
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+files = {'image': open('/path/to/pet-photo.jpg', 'rb')}
+data = {
+    'name': 'Max',
+    'specie': 'dog',
+    'birthDate': '2020-05-15'
+}
+
+response = requests.post(
+    'https://api.adoptme.com/api/pets/withimage',
+    data=data,
+    files=files
+)
+
+pet = response.json()['payload']
+```
+</CodeGroup>
+
+**Response**
+```json
+{
+  "status": "success",
+  "payload": {
+    "_id": "507f191e810c19729de860ea",
+    "name": "Max",
+    "specie": "dog",
+    "birthDate": "2020-05-15T00:00:00.000Z",
+    "adopted": false,
+    "image": "/path/to/public/img/1234567890-max.jpg"
+  }
+}
+```
+
+<Warning>
+  The image is uploaded using multer middleware and stored in the server's public/img directory. Ensure your server has proper file upload limits and validation configured.
+</Warning>
+
+### Image Upload Details
+
+- **Field Name**: `image`
+- **Storage Location**: Server's `/public/img/` directory
+- **File Path**: Automatically generated and stored in the `image` field
+- **Middleware**: Uses multer for file upload handling
+
+## Update Pet
+
+Update an existing pet's information. You can update any field except the `_id`.
+
+<CodeGroup>
+```bash cURL
+curl -X PUT https://api.adoptme.com/api/pets/507f191e810c19729de860ea \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Maximus",
+    "adopted": true
+  }'
+```
+
+```javascript JavaScript
+const petId = '507f191e810c19729de860ea';
+const response = await fetch(`https://api.adoptme.com/api/pets/${petId}`, {
+  method: 'PUT',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    name: 'Maximus',
+    adopted: true
+  })
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+pet_id = '507f191e810c19729de860ea'
+response = requests.put(
+    f'https://api.adoptme.com/api/pets/{pet_id}',
+    json={
+        'name': 'Maximus',
+        'adopted': True
+    }
+)
+
+data = response.json()
+```
+</CodeGroup>
+
+**Response**
+```json
+{
+  "status": "success",
+  "message": "pet updated"
+}
+```
+
+### Updatable Fields
+
+- `name` - Pet's name
+- `specie` - Pet's species
+- `birthDate` - Pet's birth date
+- `adopted` - Adoption status (boolean)
+- `owner` - Owner's user ID (ObjectId reference)
+- `image` - Image file path
+
+<Note>
+  The `adopted` and `owner` fields are typically managed automatically through the adoptions workflow. Manual updates should be done carefully to maintain data consistency.
+</Note>
+
+## Delete Pet
+
+Permanently remove a pet from the system.
+
+<CodeGroup>
+```bash cURL
+curl -X DELETE https://api.adoptme.com/api/pets/507f191e810c19729de860ea
+```
+
+```javascript JavaScript
+const petId = '507f191e810c19729de860ea';
+const response = await fetch(`https://api.adoptme.com/api/pets/${petId}`, {
+  method: 'DELETE'
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+pet_id = '507f191e810c19729de860ea'
+response = requests.delete(f'https://api.adoptme.com/api/pets/{pet_id}')
+data = response.json()
+```
+</CodeGroup>
+
+**Response**
+```json
+{
+  "status": "success",
+  "message": "pet deleted"
+}
+```
+
+<Warning>
+  Deleting a pet is permanent. If the pet has been adopted, make sure to handle related adoption records and user references appropriately.
+</Warning>
+
+## Pet Workflow Examples
+
+### Complete Pet Lifecycle
+
+<Steps>
+  <Step title="Create Pet">
+    Add a new pet to the system with basic information.
+  </Step>
+  <Step title="Upload Image (Optional)">
+    Use the `/withimage` endpoint to add a photo of the pet.
+  </Step>
+  <Step title="List Available Pets">
+    Display pets where `adopted: false` to potential adopters.
+  </Step>
+  <Step title="Adoption">
+    When adopted, the system automatically updates `adopted: true` and sets the `owner`.
+  </Step>
+  <Step title="Update Information">
+    Update pet details as needed (name changes, new photos, etc.).
+  </Step>
+  <Step title="Delete (If Needed)">
+    Remove pets from the system when no longer needed.
+  </Step>
+</Steps>
+
+### Filtering Available Pets
+
+To show only available pets for adoption, filter the results client-side:
+
+```javascript
+const response = await fetch('https://api.adoptme.com/api/pets');
+const data = await response.json();
+
+// Filter for available pets
+const availablePets = data.payload.filter(pet => !pet.adopted);
+
+// Filter for adopted pets
+const adoptedPets = data.payload.filter(pet => pet.adopted);
+```
+
+### Finding Pets by Species
+
+```javascript
+const response = await fetch('https://api.adoptme.com/api/pets');
+const data = await response.json();
+
+// Get all dogs
+const dogs = data.payload.filter(pet => pet.specie === 'dog');
+
+// Get all cats
+const cats = data.payload.filter(pet => pet.specie === 'cat');
+```
+
+## Error Handling
+
+All pet endpoints follow consistent error handling patterns:
+
+### Common HTTP Status Codes
+
+- `200` - Success
+- `400` - Bad request (incomplete or invalid data)
+- `404` - Pet not found
+- `500` - Server error
+
+### Error Response Format
+
+```json
+{
+  "status": "error",
+  "error": "Descriptive error message"
+}
+```
+
+## Implementation Details
+
+### Route Definitions
+
+The pet endpoints are implemented in the pets router:
+
+```javascript
+// GET /api/pets - Get all pets
+router.get('/', petsController.getAllPets);
+
+// POST /api/pets - Create pet
+router.post('/', petsController.createPet);
+
+// POST /api/pets/withimage - Create pet with image
+router.post('/withimage', uploader.single('image'), petsController.createPetWithImage);
+
+// PUT /api/pets/:pid - Update pet
+router.put('/:pid', petsController.updatePet);
+
+// DELETE /api/pets/:pid - Delete pet
+router.delete('/:pid', petsController.deletePet);
+```
+
+### Data Transfer Object (DTO)
+
+Pet data is processed through `PetDTO.getPetInputFrom()` which:
+- Validates required fields
+- Formats the data for storage
+- Handles image path processing
+- Sets default values
+
+### Service Layer
+
+The controller uses `petsService` which provides:
+- `getAll()` - Retrieve all pets
+- `getBy(filter)` - Get pets by filter criteria
+- `create(pet)` - Create new pet
+- `update(id, data)` - Update pet
+- `delete(id)` - Delete pet
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Adoptions" icon="heart" href="/guides/adoptions">
+    Learn how to create adoption records
+  </Card>
+  <Card title="User Management" icon="users" href="/guides/users">
+    Manage users who adopt pets
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/pets/get-all">
+    View complete pet API endpoints
+  </Card>
+  <Card title="Authentication" icon="lock" href="/guides/authentication">
+    Set up authentication for protected operations
+  </Card>
+</CardGroup>

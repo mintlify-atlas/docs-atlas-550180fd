@@ -1,0 +1,117 @@
+---
+title: Introduction
+description: Welcome to the Adoptme API documentation - a comprehensive pet adoption management system built with Node.js, Express, and MongoDB
+---
+
+# Introduction to Adoptme API
+
+Adoptme is a RESTful API designed to manage pet adoption processes. Built with modern Node.js technologies, it provides a complete backend solution for pet adoption platforms, including user management, pet listings, and adoption tracking.
+
+## What is Adoptme?
+
+Adoptme API is a production-ready backend system that enables you to:
+
+- **Manage Users**: Register, authenticate, and manage user profiles with role-based access control
+- **Pet Listings**: Create, update, and manage pet profiles with image uploads
+- **Adoption Tracking**: Track and manage the adoption process between users and pets
+- **Mock Data Generation**: Generate realistic test data for development and testing
+- **API Documentation**: Built-in Swagger documentation for all endpoints
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="User Management" icon="users">
+    Complete authentication system with session management, user registration, and profile updates
+  </Card>
+  <Card title="Pet Database" icon="paw">
+    Comprehensive pet management with support for multiple species, adoption status tracking, and image uploads
+  </Card>
+  <Card title="Adoption System" icon="heart">
+    Track adoptions between users and pets with a dedicated adoption model and endpoints
+  </Card>
+  <Card title="Testing Ready" icon="flask">
+    Built-in mock data generation with Faker.js and comprehensive test suite using Mocha and Chai
+  </Card>
+</CardGroup>
+
+## Technology Stack
+
+The Adoptme API is built with modern, production-tested technologies:
+
+- **Runtime**: Node.js 22+
+- **Framework**: Express.js 4.18+
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JWT tokens with bcrypt password hashing
+- **Documentation**: Swagger UI with OpenAPI 3.0
+- **Testing**: Mocha, Chai, and Supertest
+- **Mock Data**: Faker.js for realistic test data
+
+## API Endpoints
+
+The API is organized into five main resource groups:
+
+### Users (`/api/users`)
+Manage user accounts, profiles, and user data.
+
+### Pets (`/api/pets`)
+Create and manage pet listings with detailed information and images.
+
+### Adoptions (`/api/adoptions`)
+Track and manage the adoption process.
+
+### Sessions (`/api/sessions`)
+Handle user authentication, registration, and session management.
+
+### Mocks (`/api/mocks`)
+Generate mock data for testing and development purposes.
+
+## Architecture Overview
+
+The Adoptme API follows a layered architecture pattern:
+
+```
+src/
+├── app.js                  # Application entry point
+├── config/                 # Configuration management
+├── routes/                 # API route definitions
+├── controllers/            # Request handlers
+├── services/               # Business logic layer
+├── dao/                    # Data Access Objects
+├── repository/             # Repository pattern implementation
+├── dto/                    # Data Transfer Objects
+├── models/                 # Mongoose schemas
+└── utils/                  # Utility functions
+```
+
+<Note>
+This architecture separates concerns and makes the codebase maintainable, testable, and scalable.
+</Note>
+
+## Use Cases
+
+Adoptme API is perfect for:
+
+- Pet adoption websites and mobile applications
+- Animal shelter management systems
+- Pet rescue organization platforms
+- Educational projects learning backend development
+- Prototyping pet-related applications
+
+## Getting Started
+
+Ready to start using Adoptme API? Follow our [Quickstart Guide](/quickstart) to get up and running in minutes, or check out the [Installation](/installation) guide for detailed setup instructions.
+
+<Card title="Quickstart" icon="rocket" href="/quickstart">
+  Get started with Adoptme API in under 5 minutes
+</Card>
+
+## Live Demo
+
+Explore the API documentation interactively:
+
+- **Production API**: [https://coderhouse-backendiii-production.up.railway.app](https://coderhouse-backendiii-production.up.railway.app)
+- **Swagger Docs**: [https://coderhouse-backendiii-production.up.railway.app/docs](https://coderhouse-backendiii-production.up.railway.app/docs)
+
+<Warning>
+The live demo is a shared environment. Please use it responsibly and avoid uploading sensitive data.
+</Warning>

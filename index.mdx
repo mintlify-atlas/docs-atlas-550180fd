@@ -1,97 +1,311 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Adoptme API documentation"
+description: "A RESTful API service for managing pet adoptions, users, and adoption records"
+mode: custom
 ---
 
-## Setting up
+<div className="relative overflow-hidden bg-gradient-to-br from-[#244455] via-[#1a3342] to-[#0f1f2a] dark:from-[#244455] dark:via-[#1a3342] dark:to-[#0f1f2a] py-20">
+  <div className="max-w-6xl mx-auto px-6 lg:px-8">
+    <div className="grid lg:grid-cols-12 gap-8 items-center">
+      <div className="lg:col-span-7">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
+          Adoptme API documentation
+        </h1>
+        <p className="text-lg sm:text-xl text-gray-200 max-w-2xl mb-8">
+          Build pet adoption platforms with a complete REST API for managing users, pets, and adoptions. JWT authentication, image uploads, and mock data generation included.
+        </p>
+        <div className="flex flex-wrap gap-4">
+          <a
+            href="/quickstart"
+            className="inline-flex items-center justify-center px-6 py-3 text-base font-semibold text-white bg-[#2563EB] rounded-lg hover:bg-[#1d4ed8] transition-colors no-underline"
+          >
+            Get started
+          </a>
+          <a
+            href="/api-reference/overview"
+            className="inline-flex items-center justify-center px-6 py-3 text-base font-semibold text-white border border-white/30 bg-white/10 rounded-lg hover:bg-white/20 transition-colors no-underline"
+          >
+            Explore API
+          </a>
+        </div>
+      </div>
+      <div className="lg:col-span-5 hidden lg:block">
+        <div className="rounded-2xl bg-[#1a1d27] dark:bg-[#1a1d27] border border-[#27272a] dark:border-[#27272a] p-6 shadow-2xl">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-3 h-3 rounded-full bg-red-500"></div>
+            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+          </div>
+          <pre className="text-sm text-gray-300 overflow-x-auto">
+            <code>{`curl -X POST https://api.adoptme.com/api/sessions/register \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "first_name": "Jane",
+    "last_name": "Doe",
+    "email": "jane@example.com",
+    "password": "secure123"
+  }'`}</code>
+          </pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-Get your documentation site up and running in minutes.
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-3">
+    Quick start
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Get up and running with the Adoptme API in minutes
+  </p>
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+  <Steps>
+    <Step title="Clone the repository">
+      Clone the project and install dependencies to get started locally.
 
-## Make it yours
+      ```bash
+      git clone https://github.com/GitRepoFabi/coderhouse-backendIII.git
+      cd coderhouse-backendIII
+      npm install
+      ```
+    </Step>
 
-Design a docs site that looks great and empowers your users.
+    <Step title="Configure environment variables">
+      Create a `.env` file in the root directory with your MongoDB connection details.
 
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
-  </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
-  </Card>
+      ```bash
+      PORT=3000
+      MONGO_URL=mongodb://localhost:27017
+      DB_NAME=adoptme
+      ```
+
+      <Note>
+        You need Node.js version 22 or higher to run this project. Check your version with `node --version`.
+      </Note>
+    </Step>
+
+    <Step title="Start the server">
+      Launch the development server and verify it's running.
+
+      ```bash
+      npm start
+      ```
+
+      The API will be available at `http://localhost:3000`. You can access the interactive API documentation at `http://localhost:3000/docs`.
+    </Step>
+
+    <Step title="Make your first request">
+      Test the API by creating a new user.
+
+      ```bash
+      curl -X POST http://localhost:3000/api/sessions/register \
+        -H "Content-Type: application/json" \
+        -d '{
+          "first_name": "John",
+          "last_name": "Smith",
+          "email": "john@example.com",
+          "password": "password123"
+        }'
+      ```
+
+      <Accordion title="Example response">
+        ```json
+        {
+          "status": "success",
+          "payload": {
+            "_id": "507f1f77bcf86cd799439011",
+            "first_name": "John",
+            "last_name": "Smith",
+            "email": "john@example.com",
+            "role": "user",
+            "pets": []
+          }
+        }
+        ```
+      </Accordion>
+    </Step>
+  </Steps>
+</div>
+
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-3">
+    Explore by topic
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Everything you need to build with the Adoptme API
+  </p>
+
+  <CardGroup cols={2}>
     <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
+      title="Authentication"
+      icon="lock"
+      href="/guides/authentication"
+    >
+      Secure your API with JWT-based authentication and user sessions
+    </Card>
+    <Card
+      title="User management"
+      icon="users"
+      href="/guides/users"
+    >
+      Create, update, and manage user accounts and profiles
+    </Card>
+    <Card
+      title="Pet management"
+      icon="paw"
+      href="/guides/pets"
+    >
+      Add pets to the platform with image uploads and detailed profiles
+    </Card>
+    <Card
+      title="Adoption workflow"
+      icon="heart"
+      href="/guides/adoptions"
+    >
+      Connect users with pets through the adoption process
+    </Card>
+  </CardGroup>
+</div>
 
-## Create beautiful pages
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-3">
+    Key features
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Built with best practices for production-ready applications
+  </p>
 
-Everything you need to create world-class documentation.
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="rounded-lg border border-gray-200 dark:border-[#27272a] bg-white dark:bg-[#1a1d27] p-6">
+      <div className="flex items-start gap-3">
+        <div className="text-[#244455] dark:text-[#244455] text-2xl">🔐</div>
+        <div>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">Secure authentication</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">JWT tokens with bcrypt password hashing for secure user sessions</p>
+        </div>
+      </div>
+    </div>
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+    <div className="rounded-lg border border-gray-200 dark:border-[#27272a] bg-white dark:bg-[#1a1d27] p-6">
+      <div className="flex items-start gap-3">
+        <div className="text-[#244455] dark:text-[#244455] text-2xl">📸</div>
+        <div>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">Image uploads</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Multer-powered image handling for pet profile photos</p>
+        </div>
+      </div>
+    </div>
 
-## Need inspiration?
+    <div className="rounded-lg border border-gray-200 dark:border-[#27272a] bg-white dark:bg-[#1a1d27] p-6">
+      <div className="flex items-start gap-3">
+        <div className="text-[#244455] dark:text-[#244455] text-2xl">🧪</div>
+        <div>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">Mock data generation</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Generate test users and pets with @faker-js for development</p>
+        </div>
+      </div>
+    </div>
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+    <div className="rounded-lg border border-gray-200 dark:border-[#27272a] bg-white dark:bg-[#1a1d27] p-6">
+      <div className="flex items-start gap-3">
+        <div className="text-[#244455] dark:text-[#244455] text-2xl">🐳</div>
+        <div>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">Docker ready</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Containerized deployment with Docker and published images</p>
+        </div>
+      </div>
+    </div>
+
+    <div className="rounded-lg border border-gray-200 dark:border-[#27272a] bg-white dark:bg-[#1a1d27] p-6">
+      <div className="flex items-start gap-3">
+        <div className="text-[#244455] dark:text-[#244455] text-2xl">📚</div>
+        <div>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">OpenAPI documentation</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Auto-generated API docs with Swagger UI integration</p>
+        </div>
+      </div>
+    </div>
+
+    <div className="rounded-lg border border-gray-200 dark:border-[#27272a] bg-white dark:bg-[#1a1d27] p-6">
+      <div className="flex items-start gap-3">
+        <div className="text-[#244455] dark:text-[#244455] text-2xl">✅</div>
+        <div>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">Comprehensive tests</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Unit and integration testing with Mocha, Chai, and Supertest</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-3">
+    API reference
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Complete documentation for all endpoints
+  </p>
+
+  <CardGroup cols={3}>
+    <Card
+      title="Sessions"
+      icon="key"
+      href="/api-reference/sessions/register"
+    >
+      Register, login, and manage user sessions
+    </Card>
+    <Card
+      title="Users"
+      icon="user"
+      href="/api-reference/users/get-all"
+    >
+      Full CRUD operations for user management
+    </Card>
+    <Card
+      title="Pets"
+      icon="paw"
+      href="/api-reference/pets/get-all"
+    >
+      Create and manage pet listings with images
+    </Card>
+    <Card
+      title="Adoptions"
+      icon="handshake"
+      href="/api-reference/adoptions/get-all"
+    >
+      Handle pet adoption transactions
+    </Card>
+    <Card
+      title="Mock data"
+      icon="flask"
+      href="/api-reference/mocks/generate-users"
+    >
+      Generate test data for development
+    </Card>
+    <Card
+      title="Overview"
+      icon="book"
+      href="/api-reference/overview"
+    >
+      API conventions and error handling
+    </Card>
+  </CardGroup>
+</div>
+
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <div className="rounded-2xl border border-gray-200 dark:border-[#27272a] bg-gradient-to-br from-gray-50 to-white dark:from-[#1a1d27] dark:to-[#0f1117] p-8 sm:p-12">
+    <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-4">
+      Ready to get started?
+    </h2>
+    <p className="text-base text-gray-600 dark:text-gray-400 mb-8 max-w-2xl">
+      Follow the quickstart guide to set up your development environment and make your first API call in minutes.
+    </p>
+    <a
+      href="/quickstart"
+      className="inline-flex items-center justify-center px-6 py-3 text-base font-semibold text-white bg-[#244455] rounded-lg hover:bg-[#1a3342] transition-colors no-underline"
+    >
+      Start building →
+    </a>
+  </div>
+</div>

@@ -1,0 +1,334 @@
+---
+title: 'Authentication'
+description: 'Learn how to authenticate users with JWT tokens and secure your API requests'
+---
+
+## Overview
+
+The AdoptMe API uses JWT (JSON Web Tokens) for authentication. User passwords are securely hashed using bcrypt with 10 salt rounds. The API provides both protected and unprotected authentication endpoints for different use cases.
+
+## Authentication Flow
+
+<Steps>
+  <Step title="Register a New User">
+    Create a new user account with hashed password storage.
+  </Step>
+  <Step title="Login">
+    Authenticate with email and password to receive a JWT token in a cookie.
+  </Step>
+  <Step title="Access Protected Resources">
+    Include the authentication cookie in subsequent requests.
+  </Step>
+  <Step title="Verify Current Session">
+    Use the `/current` endpoint to validate your session and retrieve user data.
+  </Step>
+</Steps>
+
+## Registration
+
+### Create a New Account
+
+Register a new user with bcrypt password hashing (10 salt rounds).
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://api.adoptme.com/api/sessions/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "john.doe@example.com",
+    "password": "securePassword123"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.adoptme.com/api/sessions/register', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    first_name: 'John',
+    last_name: 'Doe',
+    email: 'john.doe@example.com',
+    password: 'securePassword123'
+  })
+});
+
+const data = await response.json();
+console.log(data.payload); // User ID
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.adoptme.com/api/sessions/register',
+    json={
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'email': 'john.doe@example.com',
+        'password': 'securePassword123'
+    }
+)
+
+data = response.json()
+print(data['payload'])  # User ID
+```
+</CodeGroup>
+
+**Response**
+```json
+{
+  "status": "success",
+  "payload": "507f1f77bcf86cd799439011"
+}
+```
+
+<Note>
+  All passwords are automatically hashed using bcrypt with 10 salt rounds before storage. Never store or transmit plain-text passwords.
+</Note>
+
+### Registration Validation
+
+The registration endpoint validates:
+- All required fields are present (`first_name`, `last_name`, `email`, `password`)
+- Email address is not already registered
+
+**Error Responses**
+```json
+// Missing fields
+{
+  "status": "error",
+  "error": "Incomplete values"
+}
+
+// Email already exists
+{
+  "status": "error",
+  "error": "User already exists"
+}
+```
+
+## Login
+
+### Authenticate and Get Token
+
+Login with your credentials to receive a JWT token stored in a secure cookie.
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://api.adoptme.com/api/sessions/login \
+  -H "Content-Type: application/json" \
+  -c cookies.txt \
+  -d '{
+    "email": "john.doe@example.com",
+    "password": "securePassword123"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.adoptme.com/api/sessions/login', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  credentials: 'include', // Important: Include cookies
+  body: JSON.stringify({
+    email: 'john.doe@example.com',
+    password: 'securePassword123'
+  })
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+session = requests.Session()
+response = session.post(
+    'https://api.adoptme.com/api/sessions/login',
+    json={
+        'email': 'john.doe@example.com',
+        'password': 'securePassword123'
+    }
+)
+
+data = response.json()
+```
+</CodeGroup>
+
+**Response**
+```json
+{
+  "status": "success",
+  "message": "Logged in"
+}
+```
+
+<Note>
+  The JWT token is automatically stored in a cookie named `coderCookie` with a 1-hour expiration. The cookie has a max age of 3600000ms (1 hour).
+</Note>
+
+### Login Error Handling
+
+**Error Responses**
+```json
+// Missing credentials
+{
+  "status": "error",
+  "error": "Incomplete values"
+}
+
+// User not found
+{
+  "status": "error",
+  "error": "User doesn't exist"
+}
+
+// Wrong password
+{
+  "status": "error",
+  "error": "Incorrect password"
+}
+```
+
+## Token Information
+
+### JWT Structure
+
+The JWT token contains a UserDTO payload with essential user information:
+
+```javascript
+// Token payload (UserDTO)
+{
+  // User identification and profile data
+  // Extracted via UserDTO.getUserTokenFrom(user)
+}
+```
+
+### Token Configuration
+
+- **Secret**: `tokenSecretJWT` (configure via environment variables in production)
+- **Expiration**: 1 hour
+- **Cookie Name**: `coderCookie`
+- **Cookie Max Age**: 3600000ms (1 hour)
+
+<Warning>
+  In production, always use a strong secret key stored in environment variables, not hardcoded values. The current implementation uses a placeholder secret that should be replaced.
+</Warning>
+
+## Current User Session
+
+### Verify Your Session
+
+Retrieve the current authenticated user's information from the JWT token.
+
+<CodeGroup>
+```bash cURL
+curl -X GET https://api.adoptme.com/api/sessions/current \
+  -b cookies.txt
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.adoptme.com/api/sessions/current', {
+  method: 'GET',
+  credentials: 'include' // Include cookies
+});
+
+const data = await response.json();
+console.log(data.payload); // User information from token
+```
+
+```python Python
+# Using the same session from login
+response = session.get('https://api.adoptme.com/api/sessions/current')
+data = response.json()
+```
+</CodeGroup>
+
+**Response**
+```json
+{
+  "status": "success",
+  "payload": {
+    // User data from JWT token
+  }
+}
+```
+
+## Unprotected Authentication
+
+<Warning>
+  The API also provides unprotected authentication endpoints (`/unprotectedLogin` and `/unprotectedCurrent`) that store the full user object in the token instead of a DTO. These endpoints should only be used for testing or development purposes, never in production.
+</Warning>
+
+### Unprotected Login
+
+```bash
+curl -X GET https://api.adoptme.com/api/sessions/unprotectedLogin \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john.doe@example.com",
+    "password": "securePassword123"
+  }'
+```
+
+This endpoint stores a token in the `unprotectedCookie` cookie.
+
+## Security Best Practices
+
+<Steps>
+  <Step title="Use HTTPS">
+    Always use HTTPS in production to encrypt token transmission.
+  </Step>
+  <Step title="Secure Cookie Settings">
+    Configure cookies with `httpOnly`, `secure`, and `sameSite` flags in production.
+  </Step>
+  <Step title="Environment Variables">
+    Store the JWT secret in environment variables, never hardcode it.
+  </Step>
+  <Step title="Token Expiration">
+    Implement token refresh logic for better user experience with short-lived tokens.
+  </Step>
+  <Step title="Password Policy">
+    Enforce strong password requirements on the client side.
+  </Step>
+</Steps>
+
+## Implementation Details
+
+### Password Hashing
+
+Passwords are hashed using bcrypt:
+
+```javascript
+// Hash password with 10 salt rounds
+const salts = await bcrypt.genSalt(10);
+const hashedPassword = await bcrypt.hash(password, salts);
+
+// Validate password
+const isValid = await bcrypt.compare(plainPassword, user.password);
+```
+
+### JWT Verification
+
+Tokens are verified using the jwt library:
+
+```javascript
+const token = req.cookies['coderCookie'];
+const user = jwt.verify(token, 'tokenSecretJWT');
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="User Management" icon="users" href="/guides/users">
+    Learn how to manage user profiles and data
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/sessions/register">
+    View complete API endpoints and parameters
+  </Card>
+</CardGroup>
