@@ -1,0 +1,125 @@
+{
+  "projectType": "api-service",
+  "projectName": "Adoptme API",
+  "projectDescription": "A RESTful API service for managing pet adoptions, users, and adoption records with MongoDB backend.",
+  "theme": "palm",
+  "primaryColor": "#244455",
+  "lightColor": null,
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/authentication",
+              "guides/users",
+              "guides/pets",
+              "guides/adoptions"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "development/testing",
+              "development/docker",
+              "development/environment"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api-reference/overview"
+            ]
+          },
+          {
+            "group": "Authentication",
+            "pages": [
+              "api-reference/sessions/register",
+              "api-reference/sessions/login",
+              "api-reference/sessions/current"
+            ]
+          },
+          {
+            "group": "Users",
+            "pages": [
+              "api-reference/users/get-all",
+              "api-reference/users/get-by-id",
+              "api-reference/users/update",
+              "api-reference/users/delete"
+            ]
+          },
+          {
+            "group": "Pets",
+            "pages": [
+              "api-reference/pets/get-all",
+              "api-reference/pets/create",
+              "api-reference/pets/create-with-image",
+              "api-reference/pets/update",
+              "api-reference/pets/delete"
+            ]
+          },
+          {
+            "group": "Adoptions",
+            "pages": [
+              "api-reference/adoptions/get-all",
+              "api-reference/adoptions/get-by-id",
+              "api-reference/adoptions/create"
+            ]
+          },
+          {
+            "group": "Mock Data",
+            "pages": [
+              "api-reference/mocks/generate-users",
+              "api-reference/mocks/generate-data"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "User authentication with JWT and bcrypt",
+    "Complete CRUD operations for users and pets",
+    "Pet adoption workflow management",
+    "Mock data generation for testing",
+    "Image upload support for pet profiles",
+    "OpenAPI/Swagger documentation",
+    "MongoDB with Mongoose ODM",
+    "Docker containerization support"
+  ],
+  "publicApiSurface": [
+    "POST /api/sessions/register",
+    "POST /api/sessions/login",
+    "GET /api/sessions/current",
+    "GET /api/users",
+    "GET /api/users/:uid",
+    "PUT /api/users/:uid",
+    "DELETE /api/users/:uid",
+    "GET /api/pets",
+    "POST /api/pets",
+    "POST /api/pets/withimage",
+    "PUT /api/pets/:pid",
+    "DELETE /api/pets/:pid",
+    "GET /api/adoptions",
+    "GET /api/adoptions/:aid",
+    "POST /api/adoptions/:uid/:pid",
+    "GET /api/mocks/mockingusers",
+    "POST /api/mocks/generateData"
+  ]
+}
